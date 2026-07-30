@@ -187,9 +187,10 @@ function makeExtCallLink(contact) {
   return `tel:${cleanMain},,${contact.ext}`;
 }
 
-// ── Google Sheets URL ────────────────────────────────────────────
+// ── Google Sheets URL (with cache-busting timestamp) ────────────
 function sheetURL(name) {
-  return `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;
+  const ts = Date.now(); // cache-buster — forces fresh data every sync
+  return `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}&_=${ts}`;
 }
 
 // ── Fetch All Data (incl. Settings) ────────────────────────────────
@@ -197,12 +198,13 @@ async function fetchSheetData() {
   if (CONFIG.USE_SAMPLE_DATA || CONFIG.SHEET_ID === 'YOUR_SHEET_ID_HERE') {
     return { orgs:SAMPLE_ORGS, contacts:SAMPLE_CONTACTS, emergency:SAMPLE_EMERGENCY, banner:SAMPLE_BANNER, settings:SAMPLE_SETTINGS };
   }
+  const fetchOpts = { cache: 'no-store' }; // always bypass browser cache
   const [orgR, conR, emR, banR, setR] = await Promise.all([
-    fetch(sheetURL(CONFIG.ORG_SHEET)),
-    fetch(sheetURL(CONFIG.CONTACTS_SHEET)),
-    fetch(sheetURL(CONFIG.EMERGENCY_SHEET)),
-    fetch(sheetURL(CONFIG.BANNER_SHEET)),
-    fetch(sheetURL(CONFIG.SETTINGS_SHEET)),
+    fetch(sheetURL(CONFIG.ORG_SHEET),       fetchOpts),
+    fetch(sheetURL(CONFIG.CONTACTS_SHEET),  fetchOpts),
+    fetch(sheetURL(CONFIG.EMERGENCY_SHEET), fetchOpts),
+    fetch(sheetURL(CONFIG.BANNER_SHEET),    fetchOpts),
+    fetch(sheetURL(CONFIG.SETTINGS_SHEET),  fetchOpts),
   ]);
   const [orgT, conT, emT, banT, setT] = await Promise.all([orgR.text(), conR.text(), emR.text(), banR.text(), setR.text()]);
   const bannerRows  = parseCSV(banT);

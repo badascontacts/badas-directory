@@ -21,7 +21,7 @@ const CONFIG = {
 
   // ── STEP 2: Switch to your real data ────────────────────────────
   // Set to false after adding your Sheet ID above
-  USE_SAMPLE_DATA: False,
+  USE_SAMPLE_DATA: false,
 
   // ── Password (Fallback only) ─────────────────────────────────────
   // PRIMARY password comes from Google Sheet → Settings tab → key: password
@@ -31,8 +31,8 @@ const CONFIG = {
   // Hours to stay logged in when "Remember me" is checked
   SESSION_HOURS: 8,
 
-  // Auto-sync interval when online (30 minutes)
-  SYNC_INTERVAL_MS: 30 * 60 * 1000,
+  // Auto-sync interval when online (5 minutes)
+  SYNC_INTERVAL_MS: 5 * 60 * 1000,
 
   // ── App Info ─────────────────────────────────────────────────────
   APP_NAME:    'BADAS Directory',
