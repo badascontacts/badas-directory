@@ -449,6 +449,22 @@ async function syncData(silent=false) {
 }
 
 // ── Banner Ad ─────────────────────────────────────────────────────
+// Auto-converts Google Drive share links to direct image URLs
+function convertToDirectImageUrl(url) {
+  if (!url) return url;
+  // Google Drive: /file/d/FILE_ID/view → uc?export=view&id=FILE_ID
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+  if (driveMatch) {
+    return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+  }
+  // Google Drive open link: id=FILE_ID
+  const openMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if (openMatch) {
+    return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
+  }
+  return url;
+}
+
 function renderBannerAd(banner) {
   const bannerEl = $('banner-ad');
   const imgEl    = $('banner-img');
@@ -461,10 +477,10 @@ function renderBannerAd(banner) {
     banner.image_url && banner.image_url.trim().startsWith('http');
 
   if (isActive) {
-    const url = banner.image_url.trim();
+    // Auto-convert Drive share links to direct image URL
+    const url = convertToDirectImageUrl(banner.image_url.trim());
     linkEl.href = (banner.click_url||'#').trim();
 
-    // Show banner first, hide only if image truly fails
     show(bannerEl);
     pagesEl.classList.add('has-banner');
 
@@ -472,11 +488,11 @@ function renderBannerAd(banner) {
     imgEl.alt     = 'Notice';
 
     imgEl.onerror = () => {
-      // Try adding cache-bust parameter if first load fails
-      if (!imgEl.src.includes('_cb=')) {
-        imgEl.src = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+      // Try lh3 CDN as fallback for Google Drive images
+      const driveId = url.match(/id=([^&]+)/);
+      if (driveId && !imgEl.src.includes('lh3')) {
+        imgEl.src = `https://lh3.googleusercontent.com/d/${driveId[1]}`;
       } else {
-        // Truly failed — hide banner
         hide(bannerEl);
         pagesEl.classList.remove('has-banner');
       }
@@ -488,6 +504,8 @@ function renderBannerAd(banner) {
     pagesEl.classList.remove('has-banner');
   }
 }
+
+
 
 
 
