@@ -464,32 +464,32 @@ function renderBannerAd(banner) {
     const url = banner.image_url.trim();
     linkEl.href = (banner.click_url||'#').trim();
 
-    // Load image eagerly (not lazy) so it shows immediately
-    imgEl.loading  = 'eager';
-    imgEl.alt      = 'Notice';
-    imgEl.src      = url;
+    // Show banner first, hide only if image truly fails
+    show(bannerEl);
+    pagesEl.classList.add('has-banner');
 
-    // If image fails, hide banner silently
+    imgEl.loading = 'eager';
+    imgEl.alt     = 'Notice';
+
     imgEl.onerror = () => {
-      console.warn('Banner image failed to load:', url);
-      hide(bannerEl);
-      pagesEl.classList.remove('has-banner');
-    };
-    imgEl.onload = () => {
-      show(bannerEl);
-      pagesEl.classList.add('has-banner');
+      // Try adding cache-bust parameter if first load fails
+      if (!imgEl.src.includes('_cb=')) {
+        imgEl.src = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+      } else {
+        // Truly failed — hide banner
+        hide(bannerEl);
+        pagesEl.classList.remove('has-banner');
+      }
     };
 
-    // Also show immediately (onload might not fire if cached)
-    if (imgEl.complete && imgEl.naturalWidth > 0) {
-      show(bannerEl);
-      pagesEl.classList.add('has-banner');
-    }
+    imgEl.src = url;
   } else {
     hide(bannerEl);
     pagesEl.classList.remove('has-banner');
   }
 }
+
+
 
 
 // ── Navigation ────────────────────────────────────────────────────

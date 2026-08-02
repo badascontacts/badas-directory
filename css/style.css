@@ -725,14 +725,7 @@ input,select { font-family:inherit; }
 
 /* ── Extension Number Styles ──────────────────────────────────────  */
 
-/* Meta row in contact card (dept + ext badge side by side) */
-.contact-card-meta {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  margin-top: 2px;
-}
-.contact-card-dept {
-  font-size: 11px; color: var(--text-muted); font-weight: 500;
-}
+
 
 /* Ext call button hover (small card button) */
 .action-btn.ext-btn:hover { background: rgba(139,92,246,.3); border-color: rgba(139,92,246,.5); }
