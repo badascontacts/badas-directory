@@ -211,12 +211,12 @@
 
 /* ── CSS Variables — BADAS Theme #1565C0 ───────────────────────── */
 :root {
-  /* Background — dark navy matching BADAS blue family */
-  --bg-base:       #060E1E;
-  --bg-surface:    #0A1628;
-  --bg-elevated:   #0F1F3A;
-  --bg-card:       rgba(255,255,255,0.05);
-  --bg-card-hover: rgba(255,255,255,0.09);
+  /* Background — deep blue (clearly blue, not black) */
+  --bg-base:       #0A1628;
+  --bg-surface:    #0F2040;
+  --bg-elevated:   #152848;
+  --bg-card:       rgba(255,255,255,0.06);
+  --bg-card-hover: rgba(255,255,255,0.10);
 
   /* BADAS Brand Blue palette — Deep Dark Blue */
   --accent:      #0D47A1;   /* Deep Dark Blue (primary) */
@@ -300,7 +300,8 @@ input,select { font-family:inherit; }
 /* ── HEADER ──────────────────────────────────────────────────────  */
 .header {
   position:sticky; top:0; z-index:100; height:var(--header-h);
-  background:rgba(6,11,31,.88);
+  background: rgba(10,25,55,.9);
+
   backdrop-filter:blur(20px) saturate(1.5);
   -webkit-backdrop-filter:blur(20px) saturate(1.5);
   border-bottom:1px solid var(--border);
@@ -331,7 +332,8 @@ input,select { font-family:inherit; }
   padding-bottom:calc(var(--nav-h) + var(--banner-h) + 16px);
 }
 /* When banner is active, add banner height to bottom padding */
-.pages-container.has-banner { --banner-h: 58px; }
+.pages-container.has-banner { --banner-h: 64px; }
+
 
 .page { display:none; animation:pageIn .28s ease; }
 .page.active { display:block; }
@@ -457,24 +459,60 @@ input,select { font-family:inherit; }
 .contacts-list { padding:8px 16px 0; display:flex; flex-direction:column; gap:10px; }
 
 /* ── CONTACT CARD ────────────────────────────────────────────────  */
-.contact-card { display:flex; align-items:center; gap:12px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:12px; cursor:pointer; transition:var(--trans); }
-.contact-card:hover { background:var(--bg-card-hover); border-color:var(--border-accent); transform:translateX(3px); }
-.contact-card:active { transform:scale(.99); }
-.contact-card-photo { position:relative; flex-shrink:0; }
-.contact-avatar { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--border); background:var(--bg-elevated); }
-.wa-badge { position:absolute; bottom:-2px; right:-2px; width:20px; height:20px; border-radius:50%; background:var(--whatsapp); display:flex; align-items:center; justify-content:center; font-size:10px; border:2px solid var(--bg-base); }
-.contact-card-body { flex:1; min-width:0; }
-.contact-card-name  { font-size:14px; font-weight:700; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.contact-card-desig { font-size:12px; color:var(--text-2); font-weight:500; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.contact-card-org   { font-size:11px; font-weight:600; margin-bottom:1px; }
-.contact-card-dept  { font-size:11px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.contact-card-actions { display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+.contact-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 14px 12px;
+  cursor: pointer; transition: var(--trans);
+}
+.contact-card:hover  { background: var(--bg-card-hover); border-color: var(--border-accent); transform: translateX(3px); }
+.contact-card:active { transform: scale(.99); }
+.contact-card-photo  { position: relative; flex-shrink: 0; }
+.contact-avatar      { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); background: var(--bg-elevated); }
+.wa-badge            { position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-radius: 50%; background: var(--whatsapp); display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid var(--bg-base); }
 
-.action-btn { width:34px; height:34px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; transition:var(--trans); flex-shrink:0; }
-.call-btn  { background:rgba(52,211,153,.12); color:var(--call-color); }
-.wa-btn    { background:rgba(37,211,102,.12); color:var(--whatsapp); }
-.email-btn { background:rgba(244,114,182,.12); color:var(--email-color); }
-.action-btn:hover { transform:scale(1.15); }
+/* Card body: each row on its own line, no mixing */
+.contact-card-body   { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.contact-card-name   { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; }
+.contact-card-desig  { font-size: 12.5px; color: var(--text-2); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.contact-card-org    { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.contact-card-meta   { display: flex; flex-direction: column; gap: 3px; margin-top: 3px; }
+.contact-card-dept   { font-size: 11.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.contact-card-phone  { font-size: 11.5px; color: var(--primary-pale); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.contact-card-ext-badge {
+  display: inline-flex; align-items: center; align-self: flex-start;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .3px;
+  color: #A78BFA; background: rgba(167,139,250,.12);
+  border: 1px solid rgba(167,139,250,.25);
+  border-radius: 20px; padding: 2px 8px;
+}
+
+/* Action buttons column */
+.contact-card-actions { display: flex; flex-direction: column; gap: 7px; flex-shrink: 0; }
+.action-btn { width: 36px; height: 36px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; transition: var(--trans); flex-shrink: 0; border: 1.5px solid transparent; }
+.call-btn  { background: rgba(52,211,153,.13);  color: var(--call-color);  border-color: rgba(52,211,153,.22); }
+.ext-btn   { background: rgba(139,92,246,.13);  color: #A78BFA;            border-color: rgba(139,92,246,.22); }
+.wa-btn    { background: rgba(37,211,102,.13);  color: var(--whatsapp);   border-color: rgba(37,211,102,.22); }
+.email-btn { background: rgba(244,114,182,.13); color: var(--email-color); border-color: rgba(244,114,182,.22); }
+.action-btn:hover { transform: scale(1.15); }
+
+/* Org-tinted contact page header (when filtered by org) */
+.contacts-org-banner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px 12px;
+  margin: 0 0 4px;
+  border-radius: 0 0 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.contacts-org-banner-icon {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: #fff;
+}
+.contacts-org-banner-name  { font-size: 15px; font-weight: 700; color: #fff; }
+.contacts-org-banner-count { font-size: 12px; color: rgba(255,255,255,.55); margin-top: 1px; }
+
+
 
 /* ── CONTACT DETAIL ──────────────────────────────────────────────  */
 .contact-hero { display:flex; flex-direction:column; align-items:center; padding:32px 20px 24px; text-align:center; background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(79,142,247,.1),transparent 70%); }
@@ -576,20 +614,24 @@ input,select { font-family:inherit; }
    BANNER AD (above bottom nav)
    ════════════════════════════════════════════════════════════════ */
 .banner-ad {
-  position:fixed;
-  bottom:var(--nav-h);
-  left:0; right:0;
-  height:58px;
-  z-index:99;
-  overflow:hidden;
-  background:var(--bg-surface);
-  border-top:1px solid var(--border);
-  box-shadow:0 -4px 16px rgba(0,0,0,.3);
-  max-width:600px;
-  margin:0 auto;
+  position: fixed;
+  bottom: var(--nav-h);
+  left: 0; right: 0;
+  height: 64px;          /* ~1.7cm — good mobile banner height */
+  z-index: 99;
+  overflow: hidden;
+  background: #071830;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 16px rgba(0,0,0,.35);
 }
-.banner-ad a { display:block; width:100%; height:100%; }
-.banner-ad img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }
+.banner-ad a { display: block; width: 100%; height: 100%; }
+.banner-ad img {
+  width: 100%; height: 100%;
+  object-fit: contain;        /* never crop, show full image */
+  object-position: center;
+  display: block;
+  background: #071830;        /* fill empty sides same as banner bg */
+}
 .banner-close {
   position:absolute; top:4px; right:6px; z-index:10;
   width:22px; height:22px; border-radius:50%;
@@ -692,23 +734,8 @@ input,select { font-family:inherit; }
   font-size: 11px; color: var(--text-muted); font-weight: 500;
 }
 
-/* Ext badge pill in contact list */
-.contact-card-ext-badge {
-  display: inline-flex; align-items: center;
-  font-size: 10px; font-weight: 700; letter-spacing: .4px;
-  color: #A78BFA;
-  background: rgba(167,139,250,.12);
-  border: 1px solid rgba(167,139,250,.25);
-  border-radius: 20px;
-  padding: 2px 7px;
-}
-
-/* Phone number shown in contact card */
-.contact-card-phone {
-  font-size: 11px; font-weight: 500;
-  color: var(--primary-pale);
-  letter-spacing: .3px;
-}
+/* Ext call button hover (small card button) */
+.action-btn.ext-btn:hover { background: rgba(139,92,246,.3); border-color: rgba(139,92,246,.5); }
 
 
 /* Ext call button in contact card action row (purple keypad icon) */

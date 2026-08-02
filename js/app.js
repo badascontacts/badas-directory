@@ -678,7 +678,36 @@ function applyFilters() {
   renderContactList(filtered);
   const hasF = org||dept||desig||search;
   hasF ? show($('clear-filters')) : hide($('clear-filters'));
+
+  // Show org-tinted banner when filtering by a single org
+  const bannerEl = $('contacts-org-banner');
+  if (bannerEl) {
+    if (org) {
+      const orgData = getOrgById(org);
+      if (orgData) {
+        const color = getOrgColor(orgData);
+        const initials = getInitials(orgData.org_name);
+        bannerEl.style.background = `linear-gradient(135deg, ${color}22, ${color}11)`;
+        bannerEl.style.borderBottom = `1px solid ${color}33`;
+        bannerEl.innerHTML = `
+          <div class="contacts-org-banner-icon" style="background:${color}">
+            ${orgData.logo_url && orgData.logo_url.startsWith('http')
+              ? `<img src="${orgData.logo_url}" style="width:100%;height:100%;object-fit:contain;border-radius:12px" onerror="this.style.display='none'">`
+              : initials}
+          </div>
+          <div>
+            <div class="contacts-org-banner-name" style="color:${color}">${orgData.org_full_name||orgData.org_name}</div>
+            <div class="contacts-org-banner-count">${filtered.length} জন পাওয়া গেছে</div>
+          </div>`;
+        show(bannerEl);
+      }
+    } else {
+      hide(bannerEl); bannerEl.innerHTML = '';
+    }
+  }
 }
+
+
 
 function renderContactList(contacts) {
   const list  = $('contacts-list');
@@ -691,7 +720,7 @@ function renderContactList(contacts) {
   list.innerHTML = contacts.map(c => {
     const org    = getOrgById(c.org_id);
     const oColor = org ? getOrgColor(org) : '#4F8EF7';
-    const hasWA  = c.has_whatsapp === 'TRUE';
+    const hasWA  = (c.has_whatsapp||'').trim().toUpperCase() === 'TRUE';
     const extLink = makeExtCallLink(c);
     const extNum  = c.ext ? toEngDigits(c.ext).replace(/\D/g,'') : '';
     // Build the phone/ext info line shown in the card
@@ -781,7 +810,7 @@ function renderContactDetail(contactId) {
   if (!c) { navigate('contacts'); return; }
   const org    = getOrgById(c.org_id);
   const oColor = org ? getOrgColor(org) : '#4F8EF7';
-  const hasWA  = c.has_whatsapp === 'TRUE';
+  const hasWA  = (c.has_whatsapp||'').trim().toUpperCase() === 'TRUE';
   const extLink = makeExtCallLink(c);
 
   $('page-title').textContent    = 'Contact';
