@@ -703,6 +703,14 @@ input,select { font-family:inherit; }
   padding: 2px 7px;
 }
 
+/* Phone number shown in contact card */
+.contact-card-phone {
+  font-size: 11px; font-weight: 500;
+  color: var(--primary-pale);
+  letter-spacing: .3px;
+}
+
+
 /* Ext call button in contact card action row (purple keypad icon) */
 .action-btn.ext-btn {
   background: rgba(139,92,246,.15);

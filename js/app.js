@@ -287,9 +287,9 @@ async function fetchSheetData() {
   const settingsObj = {};
   parseCSV(setT).forEach(row => { if (row.key) settingsObj[row.key.toLowerCase().trim()] = (row.value||'').trim(); });
   return {
-    orgs:      parseCSV(orgT),
-    contacts:  parseCSV(conT),
-    emergency: parseCSV(emT).filter(r => (r.is_active||'').toUpperCase() === 'TRUE'),
+    orgs:      parseCSV(orgT).filter(r => r.org_id && r.org_id.trim() && r.org_name && r.org_name.trim()),
+    contacts:  parseCSV(conT).filter(r => r.name && r.name.trim()),
+    emergency: parseCSV(emT).filter(r => r.name && r.name.trim() && (r.is_active||'').toUpperCase() !== 'FALSE'),
     banner,
     settings:  settingsObj,
   };
@@ -665,8 +665,14 @@ function renderContactList(contacts) {
   list.innerHTML = contacts.map(c => {
     const org    = getOrgById(c.org_id);
     const oColor = org ? getOrgColor(org) : '#4F8EF7';
-    const hasWA  = c.has_whatsapp==='TRUE';
+    const hasWA  = c.has_whatsapp === 'TRUE';
     const extLink = makeExtCallLink(c);
+    const extNum  = c.ext ? toEngDigits(c.ext).replace(/\D/g,'') : '';
+    // Build the phone/ext info line shown in the card
+    const phoneDisplay = c.phone ? displayPhone(c.phone) : '';
+    const phoneInfoParts = [];
+    if (phoneDisplay) phoneInfoParts.push(`<span class="contact-card-phone">${phoneDisplay}</span>`);
+    if (extNum)       phoneInfoParts.push(`<span class="contact-card-ext-badge">Ext. ${extNum}</span>`);
     return `<div class="contact-card" onclick="navigate('contact-detail',{contactId:'${c.contact_id}'})" role="button" tabindex="0">
       <div class="contact-card-photo">
         <img src="${getAvatarUrl(c)}" alt="${c.name}" loading="lazy" class="contact-avatar">
@@ -674,16 +680,16 @@ function renderContactList(contacts) {
       </div>
       <div class="contact-card-body">
         <div class="contact-card-name">${c.name}</div>
-        <div class="contact-card-desig">${c.designation}</div>
+        <div class="contact-card-desig">${c.designation||''}</div>
         <div class="contact-card-org" style="color:${oColor}">${org?.org_name||c.org_id}</div>
         <div class="contact-card-meta">
           ${c.department?`<span class="contact-card-dept">${c.department}</span>`:''}
-          ${c.ext?`<span class="contact-card-ext-badge">Ext. ${c.ext}</span>`:''}
+          ${phoneInfoParts.join('')}
         </div>
       </div>
       <div class="contact-card-actions">
         ${c.phone?`<a href="tel:${normPhone(c.phone)}" class="action-btn call-btn" onclick="event.stopPropagation()" title="Call: ${displayPhone(c.phone)}">${ICON_CALL}</a>`:''}
-        ${extLink?`<a href="${extLink}" class="action-btn ext-btn" onclick="event.stopPropagation()" title="Call via Extension"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M12 9h.01M15 9h.01M9 12h.01M12 12h.01M15 12h.01M9 15h.01M12 15h.01"/></svg></a>`:''}
+        ${extLink?`<a href="${extLink}" class="action-btn ext-btn" onclick="event.stopPropagation()" title="Ext. ${extNum}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M12 9h.01M15 9h.01M9 12h.01M12 12h.01M15 12h.01M9 15h.01M12 15h.01"/></svg></a>`:''}
         ${hasWA&&c.phone?`<a href="https://wa.me/${normPhone(c.phone).replace(/\D/g,'')}" class="action-btn wa-btn" onclick="event.stopPropagation()" target="_blank" rel="noopener" title="WhatsApp">${ICON_WA}</a>`:''}
         ${c.email?`<a href="mailto:${c.email}" class="action-btn email-btn" onclick="event.stopPropagation()" title="Email">${ICON_EMAIL}</a>`:''}
       </div>
