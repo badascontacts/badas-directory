@@ -452,17 +452,27 @@ async function syncData(silent=false) {
 // Auto-converts Google Drive share links to direct image URLs
 function convertToDirectImageUrl(url) {
   if (!url) return url;
-  // Google Drive: /file/d/FILE_ID/view → uc?export=view&id=FILE_ID
-  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
-  if (driveMatch) {
-    return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+  // Google Drive /file/d/ID/view → direct
+  const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+  if (driveFileMatch) {
+    return `https://drive.google.com/uc?export=view&id=${driveFileMatch[1]}`;
   }
-  // Google Drive open link: id=FILE_ID
-  const openMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  // Google Drive thumbnail?id=ID
+  const thumbMatch = url.match(/drive\.google\.com\/thumbnail\?.*id=([^&]+)/);
+  if (thumbMatch) {
+    return `https://drive.google.com/uc?export=view&id=${thumbMatch[1]}`;
+  }
+  // Google Drive open?id=ID
+  const openMatch = url.match(/drive\.google\.com\/open\?.*id=([^&]+)/);
   if (openMatch) {
     return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
   }
   return url;
+}
+
+// Wrap URL through CORS proxy (weserv.nl — free image CDN)
+function proxyUrl(url) {
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=800&output=webp&n=-1`;
 }
 
 function renderBannerAd(banner) {
@@ -477,33 +487,38 @@ function renderBannerAd(banner) {
     banner.image_url && banner.image_url.trim().startsWith('http');
 
   if (isActive) {
-    // Auto-convert Drive share links to direct image URL
-    const url = convertToDirectImageUrl(banner.image_url.trim());
+    const directUrl = convertToDirectImageUrl(banner.image_url.trim());
     linkEl.href = (banner.click_url||'#').trim();
 
     show(bannerEl);
     pagesEl.classList.add('has-banner');
-
     imgEl.loading = 'eager';
     imgEl.alt     = 'Notice';
 
+    let attempt = 0;
+    const urls = [
+      directUrl,                    // 1st: direct / converted URL
+      proxyUrl(directUrl),          // 2nd: via wsrv.nl proxy (bypasses CORS)
+    ];
+
     imgEl.onerror = () => {
-      // Try lh3 CDN as fallback for Google Drive images
-      const driveId = url.match(/id=([^&]+)/);
-      if (driveId && !imgEl.src.includes('lh3')) {
-        imgEl.src = `https://lh3.googleusercontent.com/d/${driveId[1]}`;
+      attempt++;
+      if (attempt < urls.length) {
+        imgEl.src = urls[attempt];   // try next fallback
       } else {
-        hide(bannerEl);
+        hide(bannerEl);              // all failed — hide banner
         pagesEl.classList.remove('has-banner');
       }
     };
 
-    imgEl.src = url;
+    imgEl.src = urls[0];
   } else {
     hide(bannerEl);
     pagesEl.classList.remove('has-banner');
   }
 }
+
+
 
 
 
