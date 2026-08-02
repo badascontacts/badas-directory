@@ -457,20 +457,40 @@ function renderBannerAd(banner) {
   if (!bannerEl) return;
 
   const isActive = banner &&
-    (banner.is_active||'').toUpperCase() === 'TRUE' &&
-    banner.image_url && banner.image_url.startsWith('http');
+    (banner.is_active||'').trim().toUpperCase() === 'TRUE' &&
+    banner.image_url && banner.image_url.trim().startsWith('http');
 
   if (isActive) {
-    imgEl.src        = banner.image_url;
-    linkEl.href      = banner.click_url || '#';
-    show(bannerEl);
-    pagesEl.classList.add('has-banner');
-    imgEl.onerror = () => { hide(bannerEl); pagesEl.classList.remove('has-banner'); };
+    const url = banner.image_url.trim();
+    linkEl.href = (banner.click_url||'#').trim();
+
+    // Load image eagerly (not lazy) so it shows immediately
+    imgEl.loading  = 'eager';
+    imgEl.alt      = 'Notice';
+    imgEl.src      = url;
+
+    // If image fails, hide banner silently
+    imgEl.onerror = () => {
+      console.warn('Banner image failed to load:', url);
+      hide(bannerEl);
+      pagesEl.classList.remove('has-banner');
+    };
+    imgEl.onload = () => {
+      show(bannerEl);
+      pagesEl.classList.add('has-banner');
+    };
+
+    // Also show immediately (onload might not fire if cached)
+    if (imgEl.complete && imgEl.naturalWidth > 0) {
+      show(bannerEl);
+      pagesEl.classList.add('has-banner');
+    }
   } else {
     hide(bannerEl);
     pagesEl.classList.remove('has-banner');
   }
 }
+
 
 // ── Navigation ────────────────────────────────────────────────────
 function navigate(page, params={}) {
