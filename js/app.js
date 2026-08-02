@@ -169,33 +169,46 @@ function toEngDigits(s) {
 //   8801711000001   → +8801711000001  (880 prefix → auto-add +)
 //   01711000001     → +8801711000001  (BD mobile 11 digits → +880)
 //   880-2-9669551   → +88029669551    (landline with dashes → +880)
-//   -41060460       → +88041060460    (Sheets formula bug → fix)
+//   -8788673        → ''              (Sheets formula artifact, need TEXT format)
 //   ০১৭১১০০০০০১    → +8801711000001  (Bangla → English → +880)
 function normPhone(raw) {
   if (!raw) return '';
   // Step 1: convert Bangla digits to English
   let s = toEngDigits(String(raw).trim());
-  // Step 2: fix Google Sheets formula artifact (negative from math)
+  // Step 2: fix Google Sheets formula artifact (negative from math e.g. +880-2-X → -result)
   if (s.startsWith('-') && !s.includes('+')) {
     s = s.substring(1);
   }
   // Step 3: digits only
   const digits = s.replace(/\D/g, '');
   if (!digits) return '';
-  // Step 4: smart BD prefix
-  if (digits.startsWith('880'))                        return '+' + digits;
-  if (digits.startsWith('01') && digits.length === 11) return '+880' + digits;
-  if (digits.startsWith('1')  && digits.length === 10) return '+880' + digits;
-  if (String(raw).trim().startsWith('+'))              return '+' + digits;
+  // Step 4: smart BD prefix detection
+  if (digits.startsWith('880'))                        return '+' + digits;  // 8801711... → +8801711...
+  if (digits.startsWith('01') && digits.length === 11) return '+880' + digits; // 01711000001 → +88001711000001
+  if (digits.startsWith('1')  && digits.length === 10) return '+880' + digits; // 1711000001 → +8801711000001
+  if (String(raw).trim().startsWith('+'))              return '+' + digits;   // had + originally
+  // NOTE: short numbers (< 10 digits) like "8788673" are likely Sheets formula results
+  // from +880-2-XXXXXXX being evaluated as arithmetic. These cannot be reliably
+  // reconstructed → return digits as-is (caller must validate length)
   return digits;
+}
+
+// Returns true if this is a valid dialable phone number (≥10 digits)
+function isValidPhone(normalized) {
+  if (!normalized) return false;
+  return normalized.replace(/\D/g,'').length >= 10;
 }
 
 // Show phone for display (fixes Sheets formula artifacts visually)
 function displayPhone(raw) {
   if (!raw) return '';
   const s = toEngDigits(String(raw).trim());
+  // Detect Sheets formula artifact (short negative number)
   if (s.startsWith('-') && !s.includes('+')) {
-    return '+' + s.substring(1).replace(/\D/g,'');
+    const d = s.substring(1).replace(/\D/g,'');
+    // If too short to be a real BD number, mark as needing fix
+    if (d.length < 10) return raw; // show original (will look weird, prompts user to fix)
+    return '+' + d;
   }
   return s;
 }
@@ -235,8 +248,8 @@ function getOrgById(orgId) {
 }
 
 // ── Extension Call Link ──────────────────────────────────────────
-// Builds: tel:+88029669974,,101  (main number → pause → extension)
-// If org main phone is missing, falls back to direct ext dial
+// Builds: tel:+88029669974,,101  (main number pause extension)
+// Requires org phone to be ≥10 digits (valid BD number)
 function makeExtCallLink(contact) {
   const extRaw = contact.ext ? String(contact.ext).trim() : '';
   if (!extRaw) return null;
@@ -246,19 +259,32 @@ function makeExtCallLink(contact) {
   const org = getOrgById(contact.org_id);
   if (org && org.phone) {
     const cleanMain = normPhone(org.phone);
-    if (cleanMain) return `tel:${cleanMain},,${cleanExt}`;
+    // Only use if it's a valid BD number (≥10 digits)
+    // Short numbers = Sheets formula artifact from +880-X-XXXXXXX arithmetic
+    if (isValidPhone(cleanMain)) {
+      return `tel:${cleanMain},,${cleanExt}`;
+    }
   }
-  // Fallback: dial extension directly
+  // Fallback: dial extension only (org phone not set or invalid in sheet)
   return `tel:${cleanExt}`;
 }
+
+// Returns true if this ext call has a valid org main number
+function hasValidOrgPhone(contact) {
+  const org = getOrgById(contact.org_id);
+  if (!org || !org.phone) return false;
+  return isValidPhone(normPhone(org.phone));
+}
+
 // Human-readable ext label for display
 function extDisplayLabel(contact) {
   const org = getOrgById(contact.org_id);
   const ext = toEngDigits(contact.ext || '').replace(/\D/g,'');
-  if (org && org.phone) {
+  if (org && org.phone && isValidPhone(normPhone(org.phone))) {
     return `${displayPhone(org.phone)} → Ext. ${ext}`;
   }
-  return `Ext. ${ext}`;
+  // Org phone missing or invalid → tell user to fix
+  return `Ext. ${ext} (Organizations sheet এ phone যোগ করুন)`;
 }
 
 // ── Google Sheets URL (with cache-busting timestamp) ────────────
