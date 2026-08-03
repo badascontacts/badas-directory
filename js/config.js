@@ -31,8 +31,9 @@ const CONFIG = {
   // Hours to stay logged in when "Remember me" is checked
   SESSION_HOURS: 8,
 
-  // Auto-sync interval when online (5 minutes)
-  SYNC_INTERVAL_MS: 5 * 60 * 1000,
+  // Auto-sync interval when online (10 minutes)
+  SYNC_INTERVAL_MS: 10 * 60 * 1000,
+
 
   // ── App Info ─────────────────────────────────────────────────────
   APP_NAME:    'BADAS Directory',

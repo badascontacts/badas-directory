@@ -223,24 +223,92 @@ function getOrgColor(org) {
   return ORG_COLORS[Math.max(0, idx) % ORG_COLORS.length];
 }
 function getInitials(name) { return (name || '').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
-function getAvatarUrl(contact) {
-  if (contact.photo_url && contact.photo_url.startsWith('http')) return contact.photo_url;
+
+// ── Compact MD5 (for Gravatar) ────────────────────────────────────
+function md5(s) {
+  function a(q,a,b,x,s,t){a=add(add(a,q),add(x,t));return add(a<<s|a>>>32-s,b);}
+  function ff(a,b,c,d,x,s,t){return a(b&c|~b&d,a,b,x,s,t);}
+  function gg(a,b,c,d,x,s,t){return a(b&d|c&~d,a,b,x,s,t);}
+  function hh(a,b,c,d,x,s,t){return a(b^c^d,a,b,x,s,t);}
+  function ii(a,b,c,d,x,s,t){return a(c^(b|~d),a,b,x,s,t);}
+  function add(x,y){return(x+y)&0xFFFFFFFF;}
+  s=unescape(encodeURIComponent(s));
+  const n=Array(Math.ceil((s.length+9)/64)*16).fill(0);
+  for(let i=0;i<s.length;i++)n[i>>2]|=s.charCodeAt(i)<<(i%4*8);
+  n[s.length>>2]|=0x80<<(s.length%4*8);n[n.length-2]=s.length*8;
+  let[A,B,C,D]=[1732584193,-271733879,-1732584194,271733878];
+  for(let i=0;i<n.length;i+=16){
+    const[oa,ob,oc,od]=[A,B,C,D];
+    A=ff(A,B,C,D,n[i],7,-680876936);D=ff(D,A,B,C,n[i+1],12,-389564586);C=ff(C,D,A,B,n[i+2],17,606105819);B=ff(B,C,D,A,n[i+3],22,-1044525330);
+    A=ff(A,B,C,D,n[i+4],7,-176418897);D=ff(D,A,B,C,n[i+5],12,1200080426);C=ff(C,D,A,B,n[i+6],17,-1473231341);B=ff(B,C,D,A,n[i+7],22,-45705983);
+    A=ff(A,B,C,D,n[i+8],7,1770035416);D=ff(D,A,B,C,n[i+9],12,-1958414417);C=ff(C,D,A,B,n[i+10],17,-42063);B=ff(B,C,D,A,n[i+11],22,-1990404162);
+    A=ff(A,B,C,D,n[i+12],7,1804603682);D=ff(D,A,B,C,n[i+13],12,-40341101);C=ff(C,D,A,B,n[i+14],17,-1502002290);B=ff(B,C,D,A,n[i+15],22,1236535329);
+    A=gg(A,B,C,D,n[i+1],5,-165796510);D=gg(D,A,B,C,n[i+6],9,-1069501632);C=gg(C,D,A,B,n[i+11],14,643717713);B=gg(B,C,D,A,n[i],20,-373897302);
+    A=gg(A,B,C,D,n[i+5],5,-701558691);D=gg(D,A,B,C,n[i+10],9,38016083);C=gg(C,D,A,B,n[i+15],14,-660478335);B=gg(B,C,D,A,n[i+4],20,-405537848);
+    A=gg(A,B,C,D,n[i+9],5,568446438);D=gg(D,A,B,C,n[i+14],9,-1019803690);C=gg(C,D,A,B,n[i+3],14,-187363961);B=gg(B,C,D,A,n[i+8],20,1163531501);
+    A=gg(A,B,C,D,n[i+13],5,-1444681467);D=gg(D,A,B,C,n[i+2],9,-51403784);C=gg(C,D,A,B,n[i+7],14,1735328473);B=gg(B,C,D,A,n[i+12],20,-1926607734);
+    A=hh(A,B,C,D,n[i+5],4,-378558);D=hh(D,A,B,C,n[i+8],11,-2022574463);C=hh(C,D,A,B,n[i+11],16,1839030562);B=hh(B,C,D,A,n[i+14],23,-35309556);
+    A=hh(A,B,C,D,n[i+1],4,-1530992060);D=hh(D,A,B,C,n[i+4],11,1272893353);C=hh(C,D,A,B,n[i+7],16,-155497632);B=hh(B,C,D,A,n[i+10],23,-1094730640);
+    A=hh(A,B,C,D,n[i+13],4,681279174);D=hh(D,A,B,C,n[i],11,-358537222);C=hh(C,D,A,B,n[i+3],16,-722521979);B=hh(B,C,D,A,n[i+6],23,76029189);
+    A=hh(A,B,C,D,n[i+9],4,-640364487);D=hh(D,A,B,C,n[i+12],11,-421815835);C=hh(C,D,A,B,n[i+15],16,530742520);B=hh(B,C,D,A,n[i+2],23,-995338651);
+    A=ii(A,B,C,D,n[i],6,-198630844);D=ii(D,A,B,C,n[i+7],10,1126891415);C=ii(C,D,A,B,n[i+14],15,-1416354905);B=ii(B,C,D,A,n[i+5],21,-57434055);
+    A=ii(A,B,C,D,n[i+12],6,1700485571);D=ii(D,A,B,C,n[i+3],10,-1894986606);C=ii(C,D,A,B,n[i+10],15,-1051523);B=ii(B,C,D,A,n[i+1],21,-2054922799);
+    A=ii(A,B,C,D,n[i+8],6,1873313359);D=ii(D,A,B,C,n[i+15],10,-30611744);C=ii(C,D,A,B,n[i+6],15,-1560198380);B=ii(B,C,D,A,n[i+13],21,1309151649);
+    A=ii(A,B,C,D,n[i+4],6,-145523070);D=ii(D,A,B,C,n[i+11],10,-1120210379);C=ii(C,D,A,B,n[i+2],15,718787259);B=ii(B,C,D,A,n[i+9],21,-343485551);
+    [A,B,C,D]=[add(A,oa),add(B,ob),add(C,oc),add(D,od)];
+  }
+  return [A,B,C,D].map(v=>[0,8,16,24].map(s=>('0'+((v>>s)&255).toString(16)).slice(-2)).join('')).join('');
+}
+
+// ── Domain extractor (for Clearbit) ──────────────────────────────
+function extractDomain(url) {
+  if (!url) return null;
+  try {
+    const u = url.startsWith('http') ? url : 'https://' + url;
+    return new URL(u).hostname.replace(/^www\./, '');
+  } catch { return null; }
+}
+
+// ── Staff Avatar — Priority: Sheet → Gravatar → ui-avatars ───────
+function getUiAvatarUrl(contact) {
   const palettes = ['4F8EF7','7C3AED','059669','DC2626','D97706','0891B2','BE185D','4338CA'];
   const c = palettes[(contact.contact_id||'C0').charCodeAt(1) % palettes.length];
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.name||'?')}&background=${c}&color=fff&size=200&bold=true&format=svg`;
 }
-
-// ── Org Logo Markup ──────────────────────────────────────────────
-function makeOrgLogoEl(org, size='md') {
-  const color = getOrgColor(org);
-  const initials = getInitials(org.org_name);
-  if (org.logo_url && org.logo_url.startsWith('http')) {
-    return `<img src="${org.logo_url}" alt="${org.org_name}" class="org-logo-img org-logo-${size}"
-                 onerror="this.style.display='none';this.nextSibling.style.display='flex'">
-            <div class="org-logo-initial org-logo-${size}" style="background:${color};display:none">${initials}</div>`;
+function getAvatarUrl(contact) {
+  // Priority 1: Sheet photo_url
+  if (contact.photo_url && contact.photo_url.startsWith('http')) return contact.photo_url;
+  // Priority 2: Gravatar from email (returns 404 if not found → onerror handles it)
+  if (contact.email && contact.email.includes('@')) {
+    const hash = md5(contact.email.toLowerCase().trim());
+    return `https://www.gravatar.com/avatar/${hash}?s=200&d=404`;
   }
-  return `<div class="org-logo-initial org-logo-${size}" style="background:${color}">${initials}</div>`;
+  // Priority 3: ui-avatars (initials, always works)
+  return getUiAvatarUrl(contact);
 }
+
+// ── Org Logo Markup — Priority: Sheet → Clearbit → initials ──────
+function makeOrgLogoEl(org, size='md') {
+  const color    = getOrgColor(org);
+  const initials = getInitials(org.org_name);
+  const fallback = `<div class="org-logo-initial org-logo-${size}" style="background:${color};display:none">${initials}</div>`;
+  const fallbackOnly = `<div class="org-logo-initial org-logo-${size}" style="background:${color}">${initials}</div>`;
+  const onerr = `this.style.display='none';this.nextSibling.style.display='flex'`;
+
+  // Priority 1: Sheet logo_url
+  if (org.logo_url && org.logo_url.startsWith('http')) {
+    return `<img src="${org.logo_url}" alt="${org.org_name}" class="org-logo-img org-logo-${size}" onerror="${onerr}">${fallback}`;
+  }
+  // Priority 2: Clearbit logo from org website
+  const domain = extractDomain(org.website);
+  if (domain) {
+    return `<img src="https://logo.clearbit.com/${domain}" alt="${org.org_name}" class="org-logo-img org-logo-${size}" onerror="${onerr}">${fallback}`;
+  }
+  // Priority 3: Color initials avatar
+  return fallbackOnly;
+}
+
+
 
 // ── Org Lookup ───────────────────────────────────────────────────
 function getOrgById(orgId) {
@@ -307,11 +375,17 @@ async function fetchSheetData() {
     fetch(sheetURL(CONFIG.SETTINGS_SHEET),  fetchOpts),
   ]);
   const [orgT, conT, emT, banT, setT] = await Promise.all([orgR.text(), conR.text(), emR.text(), banR.text(), setR.text()]);
-  const bannerRows  = parseCSV(banT);
-  const banner      = bannerRows.length ? bannerRows[0] : { image_url:'', click_url:'#', is_active:'FALSE' };
-  // Parse Settings: key-value rows → plain object
+
+
+  // ⚠️ Use parseCSVRaw for banner and settings — they don't have name/org_id columns
+  // so parseCSV would wrongly filter them out
+  const bannerRows = parseCSVRaw(banT);
+  const banner     = bannerRows.length ? bannerRows[0] : { image_url:'', click_url:'#', is_active:'FALSE' };
+
+  // Settings: key-value rows → plain object (also use parseCSVRaw)
   const settingsObj = {};
-  parseCSV(setT).forEach(row => { if (row.key) settingsObj[row.key.toLowerCase().trim()] = (row.value||'').trim(); });
+  parseCSVRaw(setT).forEach(row => { if (row.key) settingsObj[row.key.toLowerCase().trim()] = (row.value||'').trim(); });
+
   return {
     orgs:      parseCSV(orgT).filter(r => r.org_id && r.org_id.trim() && r.org_name && r.org_name.trim()),
     contacts:  parseCSV(conT).filter(r => r.name && r.name.trim()),
@@ -396,7 +470,7 @@ function setSyncStatus(s) {
   const text = $('sync-text');
   if (!dot || !text) return;
   dot.className = `sync-dot ${s}`;
-  const msgs = { syncing:'Syncing…', online:`Updated ${fmtSync(getLastSync())}`, offline:'Offline — Cached data', sample:'Sample data — Connect your Sheet' };
+  const msgs = { syncing:'Syncing…', online:`Updated ${fmtSync(getLastSync())}`, offline:'Offline — Cached data', error:'Sync Failed', sample:'Sample data — Connect your Sheet' };
   text.textContent = msgs[s] || '';
 }
 
@@ -783,7 +857,8 @@ function renderContactList(contacts) {
     if (extNum)       phoneInfoParts.push(`<span class="contact-card-ext-badge">Ext. ${extNum}</span>`);
     return `<div class="contact-card" onclick="navigate('contact-detail',{contactId:'${c.contact_id}'})" role="button" tabindex="0">
       <div class="contact-card-photo">
-        <img src="${getAvatarUrl(c)}" alt="${c.name}" loading="lazy" class="contact-avatar">
+        <img src="${getAvatarUrl(c)}" alt="${c.name}" loading="lazy" class="contact-avatar" onerror="this.onerror=null;this.src='${getUiAvatarUrl(c)}'">
+
         ${hasWA?'<div class="wa-badge" title="WhatsApp">💬</div>':''}
       </div>
       <div class="contact-card-body">
@@ -870,7 +945,7 @@ function renderContactDetail(contactId) {
   $('page-subtitle').textContent = c.designation;
 
   const photoEl = $('contact-photo-large');
-  if (photoEl) { photoEl.innerHTML=`<img src="${getAvatarUrl(c)}" alt="${c.name}" class="contact-photo-xl">`; photoEl.style.borderColor=oColor; }
+  if (photoEl) { photoEl.innerHTML=`<img src="${getAvatarUrl(c)}" alt="${c.name}" class="contact-photo-xl" onerror="this.onerror=null;this.src='${getUiAvatarUrl(c)}'">`; photoEl.style.borderColor=oColor; }
 
   $('contact-hero-name').textContent        = c.name;
   $('contact-hero-designation').textContent = c.designation;

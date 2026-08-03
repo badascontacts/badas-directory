@@ -106,19 +106,16 @@ const SAMPLE_SETTINGS = {
   app_version: '2.0.0',
 };
 
-// ── CSV Parser ───────────────────────────────────────────────────
+// ── CSV Parser (with key-field filter — for Contacts, Orgs, Emergency) ──
 function parseCSV(text) {
   if (!text || !text.trim()) return [];
-  // Remove BOM if present
   const cleaned = text.replace(/^\uFEFF/, '').trim();
   const lines = cleaned.split('\n');
   if (lines.length < 2) return [];
-  // Parse headers: strip BOM, trim whitespace, lowercase, replace spaces with _
   const headers = parseCSVLine(lines[0]).map(h =>
     h.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g,'_').replace(/^_|_$/g,'')
   );
   const rows = [];
-  // Key fields that identify a meaningful row
   const keyFields = ['name','org_name','org_id','contact_id','key'];
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -126,13 +123,38 @@ function parseCSV(text) {
     const values = parseCSVLine(line);
     const obj = {};
     headers.forEach((h, idx) => { obj[h] = (values[idx] || '').trim(); });
-    // Skip row if ALL key fields are empty (avoids blank/note rows)
     const hasData = keyFields.some(f => obj[f] && obj[f].length > 0);
     if (!hasData) continue;
     rows.push(obj);
   }
   return rows;
 }
+
+// ── CSV Parser RAW (no key-field filter — for Banner, Settings) ──────
+// Use this for sheets that don't have name/org_id columns (banner, settings)
+function parseCSVRaw(text) {
+  if (!text || !text.trim()) return [];
+  const cleaned = text.replace(/^\uFEFF/, '').trim();
+  const lines = cleaned.split('\n');
+  if (lines.length < 2) return [];
+  const headers = parseCSVLine(lines[0]).map(h =>
+    h.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g,'_').replace(/^_|_$/g,'')
+  );
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const values = parseCSVLine(line);
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = (values[idx] || '').trim(); });
+    // Only skip if ALL values are empty
+    if (Object.values(obj).every(v => !v)) continue;
+    rows.push(obj);
+  }
+  return rows;
+}
+
+
 
 function parseCSVLine(line) {
   const result = [];
