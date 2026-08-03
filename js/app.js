@@ -144,12 +144,13 @@ function setupLockListeners() {
 
 // ── State ─────────────────────────────────────────────
 const State = {
-  orgs: [], contacts: [], emergency: [], banner: null,
+  orgs: [], contacts: [], emergency: [], banners: [],
   settings: null,
   currentPage: 'home', currentOrg: null, currentContact: null,
   contactFilters: { org:'', dept:'', desig:'', search:'' },
   syncing: false,
 };
+
 
 // ── DOM Helpers ──────────────────────────────────────────────────
 const $  = id => document.getElementById(id);
@@ -380,8 +381,7 @@ async function fetchSheetData() {
 
   // ⚠️ Use parseCSVRaw for banner and settings — they don't have name/org_id columns
   // so parseCSV would wrongly filter them out
-  const bannerRows = parseCSVRaw(banT);
-  const banner     = bannerRows.length ? bannerRows[0] : { image_url:'', click_url:'#', is_active:'FALSE' };
+  const banners = parseCSVRaw(banT).filter(b => b.image_url && b.image_url.trim().startsWith('http'));
 
   // Settings: key-value rows → plain object (also use parseCSVRaw)
   const settingsObj = {};
@@ -391,7 +391,7 @@ async function fetchSheetData() {
     orgs:      parseCSV(orgT).filter(r => r.org_id && r.org_id.trim() && r.org_name && r.org_name.trim()),
     contacts:  parseCSV(conT).filter(r => r.name && r.name.trim()),
     emergency: parseCSV(emT).filter(r => r.name && r.name.trim() && (r.is_active||'').toUpperCase() !== 'FALSE'),
-    banner,
+    banners,
     settings:  settingsObj,
   };
 }
@@ -418,7 +418,7 @@ function saveData(d) {
     localStorage.setItem(CONFIG.STORAGE.ORGS,      JSON.stringify(d.orgs));
     localStorage.setItem(CONFIG.STORAGE.CONTACTS,  JSON.stringify(d.contacts));
     localStorage.setItem(CONFIG.STORAGE.EMERGENCY, JSON.stringify(d.emergency));
-    localStorage.setItem(CONFIG.STORAGE.BANNER,    JSON.stringify(d.banner));
+    localStorage.setItem(CONFIG.STORAGE.BANNER,    JSON.stringify(d.banners || []));
     // Save settings (password + hint) if present
     if (d.settings && Object.keys(d.settings).length) {
       localStorage.setItem(CONFIG.STORAGE.SETTINGS, JSON.stringify(d.settings));
@@ -431,9 +431,9 @@ function loadData() {
     const orgs      = JSON.parse(localStorage.getItem(CONFIG.STORAGE.ORGS)      || 'null');
     const contacts  = JSON.parse(localStorage.getItem(CONFIG.STORAGE.CONTACTS)  || 'null');
     const emergency = JSON.parse(localStorage.getItem(CONFIG.STORAGE.EMERGENCY) || 'null');
-    const banner    = JSON.parse(localStorage.getItem(CONFIG.STORAGE.BANNER)    || 'null');
+    const banners   = JSON.parse(localStorage.getItem(CONFIG.STORAGE.BANNER)    || 'null');
     const settings  = JSON.parse(localStorage.getItem(CONFIG.STORAGE.SETTINGS)  || 'null');
-    return orgs && contacts ? { orgs, contacts, emergency:emergency||[], banner:banner||SAMPLE_BANNER, settings:settings||SAMPLE_SETTINGS } : null;
+    return orgs && contacts ? { orgs, contacts, emergency:emergency||[], banners:Array.isArray(banners)?banners:[], settings:settings||SAMPLE_SETTINGS } : null;
   } catch { return null; }
 }
 function loadCachedSettings() {
@@ -495,7 +495,7 @@ async function syncData(silent=false) {
     State.orgs      = data.orgs;
     State.contacts  = data.contacts;
     State.emergency = data.emergency || [];
-    State.banner    = data.banner || null;
+    State.banners   = data.banners  || [];
     // Update settings (password/hint) from sheet
     if (data.settings && Object.keys(data.settings).length) {
       State.settings = data.settings;
@@ -503,41 +503,47 @@ async function syncData(silent=false) {
     }
     saveData(data);
     updateStats();
-    renderBannerAd(State.banner);
+    renderBannerAd(State.banners);
+    renderContactsPage();
+    renderEmergencyPage();
+    renderOrgGrid();
     setSyncStatus(CONFIG.USE_SAMPLE_DATA ? 'sample' : 'online');
     if (!silent) showToast('✅ Data updated!');
   } catch(err) {
-    console.warn('Sync failed:', err);
+    console.warn('Sync failed — loading from cache:', err.message || err);
     const cached = loadData();
     if (cached) {
-      State.orgs=cached.orgs; State.contacts=cached.contacts;
-      State.emergency=cached.emergency||[]; State.banner=cached.banner;
-      if (cached.settings) State.settings = cached.settings;
-      renderBannerAd(State.banner);
+      State.orgs      = cached.orgs      || [];
+      State.contacts  = cached.contacts  || [];
+      State.emergency = cached.emergency || [];
+      State.banners   = cached.banners   || [];
+      if (cached.settings) { State.settings = cached.settings; updateDrawerVersion(cached.settings); }
+      updateStats();
+      renderBannerAd(State.banners);
+      renderContactsPage();
+      renderEmergencyPage();
+      renderOrgGrid();
     }
-    setSyncStatus('offline');
-    if (!silent) showToast('📡 Offline — Using cached data');
+    setSyncStatus(navigator.onLine ? 'error' : 'offline');
+    if (!silent) showToast(navigator.onLine ? '⚠️ Sync failed' : '📡 Offline — Using cached data');
   } finally {
     State.syncing = false;
     if (btn) btn.classList.remove('spinning');
   }
 }
 
-// ── Banner Ad ─────────────────────────────────────────────────────
-// Auto-converts Google Drive share links to direct image URLs
+// ── Banner Ad Slideshow ─────────────────────────────────
+let _bannerTimer = null;
+let _bannerIdx   = 0;
+let _bannerList  = [];
+
+// Auto-convert Drive share links to direct image URLs
 function convertToDirectImageUrl(url) {
   if (!url) return url;
-  // Google Drive /file/d/ID/view → direct
   const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
-  if (driveFileMatch) {
-    return `https://drive.google.com/uc?export=view&id=${driveFileMatch[1]}`;
-  }
-  // Google Drive thumbnail?id=ID
+  if (driveFileMatch) return `https://drive.google.com/uc?export=view&id=${driveFileMatch[1]}`;
   const thumbMatch = url.match(/drive\.google\.com\/thumbnail\?.*id=([^&]+)/);
-  if (thumbMatch) {
-    return `https://drive.google.com/uc?export=view&id=${thumbMatch[1]}`;
-  }
-  // Google Drive open?id=ID
+  if (thumbMatch) return `https://drive.google.com/uc?export=view&id=${thumbMatch[1]}`;
   const openMatch = url.match(/drive\.google\.com\/open\?.*id=([^&]+)/);
   if (openMatch) {
     return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
@@ -1044,16 +1050,30 @@ async function initApp() {
 async function startApp() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
   window.addEventListener('online',  () => { showToast('\uD83C\uDF10 Back online!'); syncData(true); });
-  window.addEventListener('offline', () => { setSyncStatus('offline');               showToast('\uD83D\uDCE1 Offline mode'); });
+  window.addEventListener('offline', () => { setSyncStatus('offline'); showToast('\uD83D\uDCE1 Offline mode'); });
 
+  // ── Step 1: Load & render cached data IMMEDIATELY ────────────────
+  // This ensures data shows even if offline (before network attempt)
   const cached = loadData();
   if (cached) {
-    State.orgs=cached.orgs; State.contacts=cached.contacts;
-    State.emergency=cached.emergency||[]; State.banner=cached.banner;
-    if (cached.settings) State.settings = cached.settings;
+    State.orgs      = cached.orgs      || [];
+    State.contacts  = cached.contacts  || [];
+    State.emergency = cached.emergency || [];
+    State.banners   = cached.banners   || [];
+    if (cached.settings) { State.settings = cached.settings; updateDrawerVersion(cached.settings); }
+    // Render ALL pages right now from cache
+    updateStats();
+    renderBannerAd(State.banners);
+    renderContactsPage();
+    renderEmergencyPage();
+    renderOrgGrid();
+    setSyncStatus('offline'); // will update to 'online' after sync
+    $('splash-status').textContent = 'Loading from cache\u2026';
+  } else {
+    $('splash-status').textContent = 'Syncing\u2026';
   }
 
-  $('splash-status').textContent = 'Syncing\u2026';
+  // ── Step 2: Try network sync (updates cache if successful) ───────
   await syncData(true);
 
   setTimeout(() => {
@@ -1067,6 +1087,7 @@ async function startApp() {
 
   setInterval(() => { if (navigator.onLine) syncData(true); }, CONFIG.SYNC_INTERVAL_MS);
 }
+
 
 function openDrawer() {
   const drawer  = $('drawer');

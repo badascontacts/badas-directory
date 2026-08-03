@@ -619,35 +619,56 @@ input,select { font-family:inherit; }
 .nav-item.nav-emergency.active svg { filter:drop-shadow(0 0 8px rgba(239,68,68,.6)) !important; }
 
 /* ════════════════════════════════════════════════════════════════
-   BANNER AD (above bottom nav)
+   BANNER AD SLIDESHOW (above bottom nav)
    ════════════════════════════════════════════════════════════════ */
 .banner-ad {
   position: fixed;
   bottom: var(--nav-h);
   left: 0; right: 0;
-  height: 64px;          /* ~1.7cm — good mobile banner height */
+  height: 64px;
   z-index: 99;
   overflow: hidden;
   background: #071830;
   border-top: 1px solid var(--border);
   box-shadow: 0 -4px 16px rgba(0,0,0,.35);
 }
-.banner-ad a { display: block; width: 100%; height: 100%; }
-.banner-ad img {
-  width: 100%; height: 100%;
-  object-fit: cover;           /* fills full width, minimal top/bottom crop */
-  object-position: center;
-  display: block;
-  background: #071830;
+
+/* Slideshow container */
+.banner-slides { position: relative; width: 100%; height: 100%; }
+
+/* Each slide — stacked, only active is visible */
+.banner-slide {
+  position: absolute; inset: 0;
+  display: block; width: 100%; height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.banner-slide.active { opacity: 1; pointer-events: auto; }
+
+/* Dot indicators */
+.banner-dots {
+  position: absolute; bottom: 5px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 5px; z-index: 5;
+}
+.banner-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,.35); cursor: pointer;
+  transition: background .3s, transform .3s;
+}
+.banner-dot.active {
+  background: #fff; transform: scale(1.4);
 }
 
 .banner-close {
-  position:absolute; top:4px; right:6px; z-index:10;
-  width:22px; height:22px; border-radius:50%;
-  background:rgba(0,0,0,.5); color:rgba(255,255,255,.7);
-  font-size:11px; display:flex; align-items:center; justify-content:center;
-  transition:var(--trans); line-height:1;
+  position: absolute; top: 4px; right: 6px; z-index: 10;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(0,0,0,.5); color: rgba(255,255,255,.7);
+  font-size: 11px; display: flex; align-items: center; justify-content: center;
+  transition: var(--trans); line-height: 1; border: none; cursor: pointer;
 }
+
 .banner-close:hover { background:rgba(0,0,0,.8); color:#fff; }
 
 /* ════════════════════════════════════════════════════════════════
