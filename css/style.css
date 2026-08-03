@@ -707,7 +707,8 @@ input,select { font-family:inherit; }
   body { max-width:600px; margin:0 auto; }
   .header { max-width:600px; left:50%; transform:translateX(-50%); right:auto; width:600px; }
   .bottom-nav { max-width:600px; left:50%; transform:translateX(-50%); right:auto; width:600px; }
-  .banner-ad  { max-width:600px; left:50%; transform:translateX(-50%); right:auto; width:600px; }
+  .banner-ad  { left:0; right:0; width:100%; transform:none; max-width:100%; }
+
   .org-grid { display:grid; grid-template-columns:1fr 1fr; }
   .org-card { flex-direction:column; text-align:center; padding:20px 16px; }
   .org-card:hover { transform:translateY(-4px); }

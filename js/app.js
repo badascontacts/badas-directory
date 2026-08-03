@@ -225,40 +225,41 @@ function getOrgColor(org) {
 function getInitials(name) { return (name || '').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
 
 // ── Compact MD5 (for Gravatar) ────────────────────────────────────
-function md5(s) {
-  function a(q,a,b,x,s,t){a=add(add(a,q),add(x,t));return add(a<<s|a>>>32-s,b);}
-  function ff(a,b,c,d,x,s,t){return a(b&c|~b&d,a,b,x,s,t);}
-  function gg(a,b,c,d,x,s,t){return a(b&d|c&~d,a,b,x,s,t);}
-  function hh(a,b,c,d,x,s,t){return a(b^c^d,a,b,x,s,t);}
-  function ii(a,b,c,d,x,s,t){return a(c^(b|~d),a,b,x,s,t);}
-  function add(x,y){return(x+y)&0xFFFFFFFF;}
-  s=unescape(encodeURIComponent(s));
-  const n=Array(Math.ceil((s.length+9)/64)*16).fill(0);
-  for(let i=0;i<s.length;i++)n[i>>2]|=s.charCodeAt(i)<<(i%4*8);
-  n[s.length>>2]|=0x80<<(s.length%4*8);n[n.length-2]=s.length*8;
-  let[A,B,C,D]=[1732584193,-271733879,-1732584194,271733878];
-  for(let i=0;i<n.length;i+=16){
-    const[oa,ob,oc,od]=[A,B,C,D];
-    A=ff(A,B,C,D,n[i],7,-680876936);D=ff(D,A,B,C,n[i+1],12,-389564586);C=ff(C,D,A,B,n[i+2],17,606105819);B=ff(B,C,D,A,n[i+3],22,-1044525330);
-    A=ff(A,B,C,D,n[i+4],7,-176418897);D=ff(D,A,B,C,n[i+5],12,1200080426);C=ff(C,D,A,B,n[i+6],17,-1473231341);B=ff(B,C,D,A,n[i+7],22,-45705983);
-    A=ff(A,B,C,D,n[i+8],7,1770035416);D=ff(D,A,B,C,n[i+9],12,-1958414417);C=ff(C,D,A,B,n[i+10],17,-42063);B=ff(B,C,D,A,n[i+11],22,-1990404162);
-    A=ff(A,B,C,D,n[i+12],7,1804603682);D=ff(D,A,B,C,n[i+13],12,-40341101);C=ff(C,D,A,B,n[i+14],17,-1502002290);B=ff(B,C,D,A,n[i+15],22,1236535329);
-    A=gg(A,B,C,D,n[i+1],5,-165796510);D=gg(D,A,B,C,n[i+6],9,-1069501632);C=gg(C,D,A,B,n[i+11],14,643717713);B=gg(B,C,D,A,n[i],20,-373897302);
-    A=gg(A,B,C,D,n[i+5],5,-701558691);D=gg(D,A,B,C,n[i+10],9,38016083);C=gg(C,D,A,B,n[i+15],14,-660478335);B=gg(B,C,D,A,n[i+4],20,-405537848);
-    A=gg(A,B,C,D,n[i+9],5,568446438);D=gg(D,A,B,C,n[i+14],9,-1019803690);C=gg(C,D,A,B,n[i+3],14,-187363961);B=gg(B,C,D,A,n[i+8],20,1163531501);
-    A=gg(A,B,C,D,n[i+13],5,-1444681467);D=gg(D,A,B,C,n[i+2],9,-51403784);C=gg(C,D,A,B,n[i+7],14,1735328473);B=gg(B,C,D,A,n[i+12],20,-1926607734);
-    A=hh(A,B,C,D,n[i+5],4,-378558);D=hh(D,A,B,C,n[i+8],11,-2022574463);C=hh(C,D,A,B,n[i+11],16,1839030562);B=hh(B,C,D,A,n[i+14],23,-35309556);
-    A=hh(A,B,C,D,n[i+1],4,-1530992060);D=hh(D,A,B,C,n[i+4],11,1272893353);C=hh(C,D,A,B,n[i+7],16,-155497632);B=hh(B,C,D,A,n[i+10],23,-1094730640);
-    A=hh(A,B,C,D,n[i+13],4,681279174);D=hh(D,A,B,C,n[i],11,-358537222);C=hh(C,D,A,B,n[i+3],16,-722521979);B=hh(B,C,D,A,n[i+6],23,76029189);
-    A=hh(A,B,C,D,n[i+9],4,-640364487);D=hh(D,A,B,C,n[i+12],11,-421815835);C=hh(C,D,A,B,n[i+15],16,530742520);B=hh(B,C,D,A,n[i+2],23,-995338651);
-    A=ii(A,B,C,D,n[i],6,-198630844);D=ii(D,A,B,C,n[i+7],10,1126891415);C=ii(C,D,A,B,n[i+14],15,-1416354905);B=ii(B,C,D,A,n[i+5],21,-57434055);
-    A=ii(A,B,C,D,n[i+12],6,1700485571);D=ii(D,A,B,C,n[i+3],10,-1894986606);C=ii(C,D,A,B,n[i+10],15,-1051523);B=ii(B,C,D,A,n[i+1],21,-2054922799);
-    A=ii(A,B,C,D,n[i+8],6,1873313359);D=ii(D,A,B,C,n[i+15],10,-30611744);C=ii(C,D,A,B,n[i+6],15,-1560198380);B=ii(B,C,D,A,n[i+13],21,1309151649);
-    A=ii(A,B,C,D,n[i+4],6,-145523070);D=ii(D,A,B,C,n[i+11],10,-1120210379);C=ii(C,D,A,B,n[i+2],15,718787259);B=ii(B,C,D,A,n[i+9],21,-343485551);
-    [A,B,C,D]=[add(A,oa),add(B,ob),add(C,oc),add(D,od)];
+function md5(str) {
+  function rh(n){var j,s='';for(j=0;j<=3;j++)s+=hc.charAt((n>>(j*8+4))&0x0F)+hc.charAt((n>>(j*8))&0x0F);return s;}
+  function ad(x,y){var l=(x&0xFFFF)+(y&0xFFFF),m=(x>>16)+(y>>16)+(l>>16);return(m<<16)|(l&0xFFFF);}
+  function rl(n,c){return(n<<c)|(n>>>(32-c));}
+  function cm(q,a,b,x,s,t){return ad(rl(ad(ad(a,q),ad(x,t)),s),b);}
+  function ff(a,b,c,d,x,s,t){return cm((b&c)|(~b&d),a,b,x,s,t);}
+  function gg(a,b,c,d,x,s,t){return cm((b&d)|(c&~d),a,b,x,s,t);}
+  function hh(a,b,c,d,x,s,t){return cm(b^c^d,a,b,x,s,t);}
+  function ii(a,b,c,d,x,s,t){return cm(c^(b|~d),a,b,x,s,t);}
+  function sb(x){var i,nb=((x.length+8)>>6)+1,bl=new Array(nb*16);for(i=0;i<nb*16;i++)bl[i]=0;for(i=0;i<x.length;i++)bl[i>>2]|=x.charCodeAt(i)<<((i%4)*8);bl[i>>2]|=0x80<<((i%4)*8);bl[nb*16-2]=x.length*8;return bl;}
+  var hc='0123456789abcdef',i,x=sb(unescape(encodeURIComponent(str)));
+  var a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+  for(i=0;i<x.length;i+=16){
+    var oa=a,ob=b,oc=c,od=d;
+    a=ff(a,b,c,d,x[i],7,-680876936);d=ff(d,a,b,c,x[i+1],12,-389564586);c=ff(c,d,a,b,x[i+2],17,606105819);b=ff(b,c,d,a,x[i+3],22,-1044525330);
+    a=ff(a,b,c,d,x[i+4],7,-176418897);d=ff(d,a,b,c,x[i+5],12,1200080426);c=ff(c,d,a,b,x[i+6],17,-1473231341);b=ff(b,c,d,a,x[i+7],22,-45705983);
+    a=ff(a,b,c,d,x[i+8],7,1770035416);d=ff(d,a,b,c,x[i+9],12,-1958414417);c=ff(c,d,a,b,x[i+10],17,-42063);b=ff(b,c,d,a,x[i+11],22,-1990404162);
+    a=ff(a,b,c,d,x[i+12],7,1804603682);d=ff(d,a,b,c,x[i+13],12,-40341101);c=ff(c,d,a,b,x[i+14],17,-1502002290);b=ff(b,c,d,a,x[i+15],22,1236535329);
+    a=gg(a,b,c,d,x[i+1],5,-165796510);d=gg(d,a,b,c,x[i+6],9,-1069501632);c=gg(c,d,a,b,x[i+11],14,643717713);b=gg(b,c,d,a,x[i],20,-373897302);
+    a=gg(a,b,c,d,x[i+5],5,-701558691);d=gg(d,a,b,c,x[i+10],9,38016083);c=gg(c,d,a,b,x[i+15],14,-660478335);b=gg(b,c,d,a,x[i+4],20,-405537848);
+    a=gg(a,b,c,d,x[i+9],5,568446438);d=gg(d,a,b,c,x[i+14],9,-1019803690);c=gg(c,d,a,b,x[i+3],14,-187363961);b=gg(b,c,d,a,x[i+8],20,1163531501);
+    a=gg(a,b,c,d,x[i+13],5,-1444681467);d=gg(d,a,b,c,x[i+2],9,-51403784);c=gg(c,d,a,b,x[i+7],14,1735328473);b=gg(b,c,d,a,x[i+12],20,-1926607734);
+    a=hh(a,b,c,d,x[i+5],4,-378558);d=hh(d,a,b,c,x[i+8],11,-2022574463);c=hh(c,d,a,b,x[i+11],16,1839030562);b=hh(b,c,d,a,x[i+14],23,-35309556);
+    a=hh(a,b,c,d,x[i+1],4,-1530992060);d=hh(d,a,b,c,x[i+4],11,1272893353);c=hh(c,d,a,b,x[i+7],16,-155497632);b=hh(b,c,d,a,x[i+10],23,-1094730640);
+    a=hh(a,b,c,d,x[i+13],4,681279174);d=hh(d,a,b,c,x[i],11,-358537222);c=hh(c,d,a,b,x[i+3],16,-722521979);b=hh(b,c,d,a,x[i+6],23,76029189);
+    a=hh(a,b,c,d,x[i+9],4,-640364487);d=hh(d,a,b,c,x[i+12],11,-421815835);c=hh(c,d,a,b,x[i+15],16,530742520);b=hh(b,c,d,a,x[i+2],23,-995338651);
+    a=ii(a,b,c,d,x[i],6,-198630844);d=ii(d,a,b,c,x[i+7],10,1126891415);c=ii(c,d,a,b,x[i+14],15,-1416354905);b=ii(b,c,d,a,x[i+5],21,-57434055);
+    a=ii(a,b,c,d,x[i+12],6,1700485571);d=ii(d,a,b,c,x[i+3],10,-1894986606);c=ii(c,d,a,b,x[i+10],15,-1051523);b=ii(b,c,d,a,x[i+1],21,-2054922799);
+    a=ii(a,b,c,d,x[i+8],6,1873313359);d=ii(d,a,b,c,x[i+15],10,-30611744);c=ii(c,d,a,b,x[i+6],15,-1560198380);b=ii(b,c,d,a,x[i+13],21,1309151649);
+    a=ii(a,b,c,d,x[i+4],6,-145523070);d=ii(d,a,b,c,x[i+11],10,-1120210379);c=ii(c,d,a,b,x[i+2],15,718787259);b=ii(b,c,d,a,x[i+9],21,-343485551);
+    a=ad(a,oa);b=ad(b,ob);c=ad(c,oc);d=ad(d,od);
   }
-  return [A,B,C,D].map(v=>[0,8,16,24].map(s=>('0'+((v>>s)&255).toString(16)).slice(-2)).join('')).join('');
+  return rh(a)+rh(b)+rh(c)+rh(d);
 }
+
 
 // ── Domain extractor (for Clearbit) ──────────────────────────────
 function extractDomain(url) {
