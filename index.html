@@ -118,13 +118,10 @@
   <!-- ═══════════════════ SPLASH SCREEN ═══════════════════ -->
   <div id="splash-screen" class="splash">
     <div class="splash-logo">
-      <svg width="80" height="80" viewBox="0 0 80 80">
-        <defs>
-          <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#0D47A1"/>
-            <stop offset="100%" stop-color="#1565C0"/>
-          </linearGradient>
-        </defs>
+      <img src="https://badas.org.bd/logo.png" alt="BADAS Logo" class="splash-logo-img"
+           onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+      <svg style="display:none" width="80" height="80" viewBox="0 0 80 80">
+        <defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0D47A1"/><stop offset="100%" stop-color="#1565C0"/></linearGradient></defs>
         <circle cx="40" cy="40" r="38" fill="url(#lg1)" opacity="0.15"/>
         <circle cx="40" cy="40" r="28" fill="url(#lg1)" opacity="0.3"/>
         <circle cx="40" cy="40" r="18" fill="url(#lg1)"/>
@@ -152,7 +149,10 @@
           <span></span><span></span><span></span>
         </button>
         <div class="header-brand">
-          <div class="header-logo-icon">B</div>
+          <div class="header-logo-icon">
+            <img src="https://badas.org.bd/logo.png" alt="BADAS" class="header-logo-img"
+                 onerror="this.style.display='none';this.parentElement.textContent='B'">
+          </div>
           <div class="header-text">
             <h1 id="page-title">BADAS Directory</h1>
             <p id="page-subtitle">Contact Directory</p>
@@ -371,7 +371,10 @@
   <div id="drawer-overlay" class="drawer-overlay hidden"></div>
   <div id="drawer" class="drawer">
     <div class="drawer-header">
-      <div class="drawer-logo">B</div>
+      <div class="drawer-logo">
+        <img src="https://badas.org.bd/logo.png" alt="BADAS" class="drawer-logo-img"
+             onerror="this.style.display='none';this.parentElement.textContent='B'">
+      </div>
       <div>
         <div class="drawer-app-name">BADAS Directory</div>
         <div class="drawer-app-tagline">Contact Directory</div>
