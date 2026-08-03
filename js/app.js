@@ -1004,22 +1004,29 @@ const ICON_WA    = `<svg width="18" height="18" viewBox="0 0 24 24" fill="curren
 const ICON_EMAIL = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`;
 
 // ── Init ──────────────────────────────────────────────────────────
+// Hide the splash screen with a fade animation
+function hideSplash() {
+  const s = $('splash-screen');
+  if (s && !s.classList.contains('hidden')) {
+    s.classList.add('fade-out');
+    setTimeout(() => s.classList.add('hidden'), 400);
+  }
+}
+
 async function initApp() {
-  // 1. Fetch latest Settings from Sheet first (to get current password).
-  //    This runs BEFORE checking session so we always validate against
-  //    the most up-to-date password.
   const lockStatus = $('lock-fetch-status');
   if (lockStatus) { lockStatus.textContent = 'Checking…'; show(lockStatus); }
 
   let currentSettings = null;
   try {
-    const fresh = await fetchSettingsOnly();
+    // 8-second timeout — if Sheet unreachable, fall back to cache instantly
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000));
+    const fresh = await Promise.race([fetchSettingsOnly(), timeout]);
     if (fresh) {
       currentSettings = fresh;
-      State.settings = fresh;
+      State.settings  = fresh;
       localStorage.setItem(CONFIG.STORAGE.SETTINGS, JSON.stringify(fresh));
     } else {
-      // Offline — use cached settings
       currentSettings = loadCachedSettings() || SAMPLE_SETTINGS;
       State.settings  = currentSettings;
     }
@@ -1030,22 +1037,23 @@ async function initApp() {
 
   if (lockStatus) hide(lockStatus);
 
-  // 2. Get the correct password (sheet → cache → config fallback)
   const correctPw = (currentSettings && currentSettings.password)
     || CONFIG.PASSWORD
     || '';
 
-  // 3. Check if saved session password still matches current password.
-  //    If admin changed the password in Sheet → session is invalidated.
   if (checkSession(correctPw)) {
     hide($('lock-screen'));
     await startApp();
     return;
   }
 
-  // 4. Session invalid or first launch — show lock screen.
+  // Session invalid / first launch — hide splash, show lock screen
+  hideSplash();
+  const lockEl = $('lock-screen');
+  if (lockEl) lockEl.classList.remove('hidden');
   setupLockListeners();
 }
+
 
 async function startApp() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
