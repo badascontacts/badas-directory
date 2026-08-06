@@ -1,14 +1,14 @@
-// ================================================================
-// BADAS DIRECTORY — Main Application
+﻿// ================================================================
+// BADAS DIRECTORY -- Main Application
 // ================================================================
 
-// ── AUTH / LOCK SCREEN ───────────────────────────────────────────
+// -- AUTH / LOCK SCREEN -------------------------------------------
 let _failCount = 0;
 let _lockUntil = 0;
 
-// ── SESSION: Password-based (permanent until sheet password changes) ──
+// -- SESSION: Password-based (permanent until sheet password changes) --
 // Saves the password the user entered. On next open, fetches the
-// current sheet password and compares — if still matches, skip login.
+// current sheet password and compares -- if still matches, skip login.
 
 function getSavedSessionPassword() {
   try {
@@ -142,7 +142,7 @@ function setupLockListeners() {
   }
 }
 
-// ── State ─────────────────────────────────────────────
+// -- State ---------------------------------------------
 const State = {
   orgs: [], contacts: [], emergency: [], banners: [],
   settings: null,
@@ -152,12 +152,12 @@ const State = {
 };
 
 
-// ── DOM Helpers ──────────────────────────────────────────────────
+// -- DOM Helpers --------------------------------------------------
 const $  = id => document.getElementById(id);
 const show = el => { if (el) el.classList.remove('hidden'); };
 const hide = el => { if (el) el.classList.add('hidden');    };
 
-// ── Bangla → English digit converter ─────────────────────────────
+// -- Bangla → English digit converter -----------------------------
 // Converts Bengali digits (০১২৩৪৫৬৭৮৯) to English (0123456789)
 const BN_DIGITS = '০১২৩৪৫৬৭৮৯';
 function toEngDigits(s) {
@@ -165,7 +165,7 @@ function toEngDigits(s) {
   return String(s).replace(/[০-৯]/g, d => String(BN_DIGITS.indexOf(d)));
 }
 
-// Smart phone normalizer — handles all formats automatically:
+// Smart phone normalizer -- handles all formats automatically:
 //   +8801711000001  → +8801711000001  (correct, keep as-is)
 //   8801711000001   → +8801711000001  (880 prefix → auto-add +)
 //   01711000001     → +8801711000001  (BD mobile 11 digits → +880)
@@ -215,7 +215,7 @@ function displayPhone(raw) {
 }
 
 
-// ── Colors / Avatars ─────────────────────────────────────────────
+// -- Colors / Avatars ---------------------------------------------
 const ORG_COLORS = ['#4F8EF7','#7C3AED','#059669','#DC2626','#D97706','#0891B2','#0F766E','#BE185D','#4338CA','#B45309','#7C3AED','#06B6D4','#16A34A','#2563EB','#EA580C'];
 
 function getOrgColor(org) {
@@ -225,7 +225,7 @@ function getOrgColor(org) {
 }
 function getInitials(name) { return (name || '').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
 
-// ── Compact MD5 (for Gravatar) ────────────────────────────────────
+// -- Compact MD5 (for Gravatar) ------------------------------------
 function md5(str) {
   function rh(n){var j,s='';for(j=0;j<=3;j++)s+=hc.charAt((n>>(j*8+4))&0x0F)+hc.charAt((n>>(j*8))&0x0F);return s;}
   function ad(x,y){var l=(x&0xFFFF)+(y&0xFFFF),m=(x>>16)+(y>>16)+(l>>16);return(m<<16)|(l&0xFFFF);}
@@ -262,7 +262,7 @@ function md5(str) {
 }
 
 
-// ── Domain extractor (for Clearbit) ──────────────────────────────
+// -- Domain extractor (for Clearbit) ------------------------------
 function extractDomain(url) {
   if (!url) return null;
   try {
@@ -271,7 +271,7 @@ function extractDomain(url) {
   } catch { return null; }
 }
 
-// ── Staff Avatar — Priority: Sheet → Gravatar → ui-avatars ───────
+// -- Staff Avatar -- Priority: Sheet → Gravatar → ui-avatars -------
 function getUiAvatarUrl(contact) {
   const palettes = ['4F8EF7','7C3AED','059669','DC2626','D97706','0891B2','BE185D','4338CA'];
   const c = palettes[(contact.contact_id||'C0').charCodeAt(1) % palettes.length];
@@ -289,7 +289,7 @@ function getAvatarUrl(contact) {
   return getUiAvatarUrl(contact);
 }
 
-// ── Org Logo Markup — Priority: Sheet → Clearbit → initials ──────
+// -- Org Logo Markup -- Priority: Sheet → Clearbit → initials ------
 function makeOrgLogoEl(org, size='md') {
   const color    = getOrgColor(org);
   const initials = getInitials(org.org_name);
@@ -312,12 +312,12 @@ function makeOrgLogoEl(org, size='md') {
 
 
 
-// ── Org Lookup ───────────────────────────────────────────────────
+// -- Org Lookup ---------------------------------------------------
 function getOrgById(orgId) {
   return State.orgs.find(o => o.org_id === orgId) || null;
 }
 
-// ── Extension Call Link ──────────────────────────────────────────
+// -- Extension Call Link ------------------------------------------
 // Builds: tel:+88029669974,,101  (main number pause extension)
 // Requires org phone to be ≥10 digits (valid BD number)
 function makeExtCallLink(contact) {
@@ -357,13 +357,13 @@ function extDisplayLabel(contact) {
   return `Ext. ${ext} (Organizations sheet এ phone যোগ করুন)`;
 }
 
-// ── Google Sheets URL (with cache-busting timestamp) ────────────
+// -- Google Sheets URL (with cache-busting timestamp) ------------
 function sheetURL(name) {
-  const ts = Date.now(); // cache-buster — forces fresh data every sync
+  const ts = Date.now(); // cache-buster -- forces fresh data every sync
   return `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}&_=${ts}`;
 }
 
-// ── Fetch All Data (incl. Settings) ────────────────────────────────
+// -- Fetch All Data (incl. Settings) --------------------------------
 async function fetchSheetData() {
   if (CONFIG.USE_SAMPLE_DATA || CONFIG.SHEET_ID === 'YOUR_SHEET_ID_HERE') {
     return { orgs:SAMPLE_ORGS, contacts:SAMPLE_CONTACTS, emergency:SAMPLE_EMERGENCY, banner:SAMPLE_BANNER, settings:SAMPLE_SETTINGS };
@@ -379,7 +379,7 @@ async function fetchSheetData() {
   const [orgT, conT, emT, banT, setT] = await Promise.all([orgR.text(), conR.text(), emR.text(), banR.text(), setR.text()]);
 
 
-  // ⚠️ Use parseCSVRaw for banner and settings — they don't have name/org_id columns
+  // ⚠️ Use parseCSVRaw for banner and settings -- they don't have name/org_id columns
   // so parseCSV would wrongly filter them out
   const banners = parseCSVRaw(banT).filter(b => b.image_url && b.image_url.trim().startsWith('http'));
 
@@ -396,7 +396,7 @@ async function fetchSheetData() {
   };
 }
 
-// ── Settings-only fetch (lightweight, used for auth before main load) ──
+// -- Settings-only fetch (lightweight, used for auth before main load) --
 async function fetchSettingsOnly() {
   if (CONFIG.USE_SAMPLE_DATA || CONFIG.SHEET_ID === 'YOUR_SHEET_ID_HERE') {
     return SAMPLE_SETTINGS;
@@ -412,7 +412,7 @@ async function fetchSettingsOnly() {
   } catch { return null; }
 }
 
-// ── Storage ───────────────────────────────────────────────────────
+// -- Storage -------------------------------------------------------
 function saveData(d) {
   try {
     localStorage.setItem(CONFIG.STORAGE.ORGS,      JSON.stringify(d.orgs));
@@ -451,7 +451,7 @@ function fmtSync(ts) {
   return `${Math.floor(h/24)}d ago`;
 }
 
-// ── Toast ─────────────────────────────────────────────────────────
+// -- Toast ---------------------------------------------------------
 let _toastTimer;
 function showToast(msg, ms=3000) {
   const el = $('toast');
@@ -465,17 +465,17 @@ function showToast(msg, ms=3000) {
   }, ms);
 }
 
-// ── Sync Status Indicator ─────────────────────────────────────────
+// -- Sync Status Indicator -----------------------------------------
 function setSyncStatus(s) {
   const dot  = document.querySelector('.sync-dot');
   const text = $('sync-text');
   if (!dot || !text) return;
   dot.className = `sync-dot ${s}`;
-  const msgs = { syncing:'Syncing…', online:`Updated ${fmtSync(getLastSync())}`, offline:'Offline — Cached data', error:'Sync Failed', sample:'Sample data — Connect your Sheet' };
+  const msgs = { syncing:'Syncing...', online:`Updated ${fmtSync(getLastSync())}`, offline:'Offline -- Cached data', error:'Sync Failed', sample:'Sample data -- Connect your Sheet' };
   text.textContent = msgs[s] || '';
 }
 
-// ── Drawer Version Updater ────────────────────────────────────────
+// -- Drawer Version Updater ----------------------------------------
 function updateDrawerVersion(settings) {
   const el = $('drawer-app-version');
   if (!el) return;
@@ -483,7 +483,7 @@ function updateDrawerVersion(settings) {
   el.textContent = 'Version ' + v;
 }
 
-// ── Sync Data ─────────────────────────────────────────────────────
+// -- Sync Data -----------------------------------------------------
 async function syncData(silent=false) {
   if (State.syncing) return;
   State.syncing = true;
@@ -510,7 +510,7 @@ async function syncData(silent=false) {
     setSyncStatus(CONFIG.USE_SAMPLE_DATA ? 'sample' : 'online');
     if (!silent) showToast('✅ Data updated!');
   } catch(err) {
-    console.warn('Sync failed — loading from cache:', err.message || err);
+    console.warn('Sync failed -- loading from cache:', err.message || err);
     const cached = loadData();
     if (cached) {
       State.orgs      = cached.orgs      || [];
@@ -525,14 +525,14 @@ async function syncData(silent=false) {
       renderOrgGrid();
     }
     setSyncStatus(navigator.onLine ? 'error' : 'offline');
-    if (!silent) showToast(navigator.onLine ? '⚠️ Sync failed' : '📡 Offline — Using cached data');
+    if (!silent) showToast(navigator.onLine ? '⚠️ Sync failed' : '📡 Offline -- Using cached data');
   } finally {
     State.syncing = false;
     if (btn) btn.classList.remove('spinning');
   }
 }
 
-// ── Banner Ad Slideshow ─────────────────────────────────
+// -- Banner Ad Slideshow ---------------------------------
 let _bannerTimer = null;
 let _bannerIdx   = 0;
 let _bannerList  = [];
@@ -551,7 +551,7 @@ function convertToDirectImageUrl(url) {
   return url;
 }
 
-// Wrap URL through CORS proxy (weserv.nl — free image CDN)
+// Wrap URL through CORS proxy (weserv.nl -- free image CDN)
 function proxyUrl(url) {
   return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=800&output=webp&n=-1`;
 }
@@ -587,7 +587,7 @@ function renderBannerAd(banner) {
       if (attempt < urls.length) {
         imgEl.src = urls[attempt];   // try next fallback
       } else {
-        hide(bannerEl);              // all failed — hide banner
+        hide(bannerEl);              // all failed -- hide banner
         pagesEl.classList.remove('has-banner');
       }
     };
@@ -606,7 +606,7 @@ function renderBannerAd(banner) {
 
 
 
-// ── Navigation ────────────────────────────────────────────────────
+// -- Navigation ----------------------------------------------------
 function navigate(page, params={}) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const pageEl = $(`page-${page}`);
@@ -658,21 +658,21 @@ function goBack() {
   else navigate('home');
 }
 
-// ── Data Helpers ──────────────────────────────────────────────────
+// -- Data Helpers --------------------------------------------------
 function getOrgById(id) { return State.orgs.find(o=>o.org_id===id); }
 function getContactById(id) { return State.contacts.find(c=>c.contact_id===id); }
 function getUnique(field) { return [...new Set(State.contacts.map(c=>c[field]).filter(Boolean))].sort(); }
 
-// ── Stats ─────────────────────────────────────────────────────────
+// -- Stats ---------------------------------------------------------
 function updateStats() {
   const s = $('stat-orgs');     if(s) s.textContent = State.orgs.length;
   const c = $('stat-contacts'); if(c) c.textContent = State.contacts.length;
   const d = $('stat-depts');    if(d) d.textContent = getUnique('department').length;
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 // HOME PAGE
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 function renderHomePage() {
   updateStats();
   renderOrgGrid(State.orgs);
@@ -715,9 +715,9 @@ function renderOrgGrid(orgs) {
   }).join('');
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 // ORG PROFILE PAGE
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 function renderOrgPage(orgId) {
   const org = getOrgById(orgId);
   if (!org) { navigate('home'); return; }
@@ -750,9 +750,9 @@ function renderOrgPage(orgId) {
   btn.onclick = () => navigate('contacts',{orgId});
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 // CONTACTS PAGE
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 function renderContactsPage() {
   populateFilters();
   applyFilters();
@@ -887,9 +887,9 @@ function renderContactList(contacts) {
   }).join('');
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 // EMERGENCY PAGE
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 function renderEmergencyPage() {
   // National helplines
   const natGrid = $('national-emergency-grid');
@@ -937,9 +937,9 @@ function renderEmergencyPage() {
   }).join('');
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 // CONTACT DETAIL PAGE
-// ══════════════════════════════════════════════════════════════════
+// ==================================================================
 function renderContactDetail(contactId) {
   const c = getContactById(contactId);
   if (!c) { navigate('contacts'); return; }
@@ -998,12 +998,12 @@ function renderContactDetail(contactId) {
   $('contact-actions').innerHTML = `<div class="section"><div class="action-row">${btns.join('')}</div></div>`;
 }
 
-// ── Icon SVGs (reusable) ─────────────────────────────────────────
+// -- Icon SVGs (reusable) -----------------------------------------
 const ICON_CALL  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>`;
 const ICON_WA    = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
 const ICON_EMAIL = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`;
 
-// ── Init ──────────────────────────────────────────────────────────
+// -- Init ----------------------------------------------------------
 // Hide the splash screen with a fade animation
 function hideSplash() {
   const s = $('splash-screen');
@@ -1015,11 +1015,11 @@ function hideSplash() {
 
 async function initApp() {
   const lockStatus = $('lock-fetch-status');
-  if (lockStatus) { lockStatus.textContent = 'Checking…'; show(lockStatus); }
+  if (lockStatus) { lockStatus.textContent = 'Checking...'; show(lockStatus); }
 
   let currentSettings = null;
   try {
-    // 8-second timeout — if Sheet unreachable, fall back to cache instantly
+    // 8-second timeout -- if Sheet unreachable, fall back to cache instantly
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000));
     const fresh = await Promise.race([fetchSettingsOnly(), timeout]);
     if (fresh) {
@@ -1047,7 +1047,7 @@ async function initApp() {
     return;
   }
 
-  // Session invalid / first launch — hide splash, show lock screen
+  // Session invalid / first launch -- hide splash, show lock screen
   hideSplash();
   const lockEl = $('lock-screen');
   if (lockEl) lockEl.classList.remove('hidden');
@@ -1060,7 +1060,7 @@ async function startApp() {
   window.addEventListener('online',  () => { showToast('\uD83C\uDF10 Back online!'); syncData(true); });
   window.addEventListener('offline', () => { setSyncStatus('offline'); showToast('\uD83D\uDCE1 Offline mode'); });
 
-  // ── Step 1: Load & render cached data IMMEDIATELY ────────────────
+  // -- Step 1: Load & render cached data IMMEDIATELY ----------------
   // This ensures data shows even if offline (before network attempt)
   const cached = loadData();
   if (cached) {
@@ -1081,7 +1081,7 @@ async function startApp() {
     $('splash-status').textContent = 'Syncing\u2026';
   }
 
-  // ── Step 2: Try network sync (updates cache if successful) ───────
+  // -- Step 2: Try network sync (updates cache if successful) -------
   await syncData(true);
 
   setTimeout(() => {

@@ -1,8 +1,8 @@
-// ================================================================
+﻿// ================================================================
 // BADAS DIRECTORY - Sample & Fallback Data
 // ================================================================
 
-// ── Organizations (15 Sister Concerns) ──────────────────────────
+// -- Organizations (15 Sister Concerns) --------------------------
 const SAMPLE_ORGS = [
   { org_id:'BADAS',  org_name:'BADAS',    org_full_name:'Diabetic Association of Bangladesh',                                                            logo_url:'', address:'122 Kazi Nazrul Islam Ave, Dhaka-1000',  phone:'+880-2-9669551',  email:'info@badas.org.bd',        website:'https://www.badas.bd',       about:'BADAS (Diabetic Association of Bangladesh) is the pioneering organization in Bangladesh dedicated to the prevention and management of diabetes since 1956.', color:'#1565C0' },
   { org_id:'BIRDEM', org_name:'BIRDEM',   org_full_name:'Bangladesh Institute of Research & Rehabilitation in Diabetes, Endocrine and Metabolic Disorders', logo_url:'', address:'Shahbagh, Dhaka-1000',                 phone:'+880-2-9669974',  email:'info@birdem-gh.com',       website:'https://www.birdembd.org',   about:'BIRDEM General Hospital is a specialized referral hospital under BADAS providing tertiary level healthcare.', color:'#00796B' },
@@ -21,7 +21,7 @@ const SAMPLE_ORGS = [
   { org_id:'BFN',    org_name:'BADAS Fdn',org_full_name:'BADAS Foundation',                                                                                 logo_url:'', address:'122 Kazi Nazrul Islam Ave, Dhaka-1000',phone:'+880-2-9669554',  email:'foundation@badas.org.bd',  website:'',                           about:'BADAS Foundation supports social welfare activities, scholarships, and community health programs.', color:'#1565C0' },
 ];
 
-// ── Contacts ─────────────────────────────────────────────────────
+// -- Contacts -----------------------------------------------------
 // Google Sheet column order:
 //   contact_id | org_id | name | designation | department | phone | email | photo_url | has_whatsapp | ext
 // ext = telephone extension number on the org's main landline (optional, leave blank if none)
@@ -66,7 +66,7 @@ const SAMPLE_CONTACTS = [
   { contact_id:'C038', org_id:'BFN',    name:'Ms. Dilruba Khan',              designation:'Program Officer',         department:'Programs',            phone:'+8801711000038', email:'programs@badasfoundation.org',  photo_url:'', has_whatsapp:'TRUE',  ext:''    },
 ];
 
-// ── Emergency Contacts ───────────────────────────────────────────
+// -- Emergency Contacts -------------------------------------------
 // Google Sheet column order: contact_id | name | designation | org_id | phone | type | is_active
 const SAMPLE_EMERGENCY = [
   { contact_id:'E001', name:'BIRDEM Emergency',        designation:'Emergency Department', org_id:'BIRDEM', phone:'+880-2-9669974',  type:'Hospital',   is_active:'TRUE' },
@@ -76,7 +76,7 @@ const SAMPLE_EMERGENCY = [
   { contact_id:'E005', name:'BIRDEM Ambulance',        designation:'Ambulance Service',    org_id:'BIRDEM', phone:'+880-2-9669001',  type:'Ambulance',  is_active:'TRUE' },
 ];
 
-// ── National Emergency Numbers (hardcoded, always available) ────
+// -- National Emergency Numbers (hardcoded, always available) ----
 const NATIONAL_EMERGENCY = [
   { label:'Police',           number:'999',   icon:'🚔', color:'#3B82F6' },
   { label:'Ambulance',        number:'199',   icon:'🚑', color:'#EF4444' },
@@ -86,7 +86,7 @@ const NATIONAL_EMERGENCY = [
   { label:'COVID Helpline',   number:'16741', icon:'🏥', color:'#0891B2' },
 ];
 
-// ── Banner Ad ────────────────────────────────────────────────────
+// -- Banner Ad ----------------------------------------------------
 // Google Sheet column order: image_url | click_url | is_active
 // Set is_active to FALSE or leave empty to hide banner
 const SAMPLE_BANNER = {
@@ -95,7 +95,7 @@ const SAMPLE_BANNER = {
   is_active:  'FALSE', // TRUE or FALSE
 };
 
-// ── App Settings (from 'Settings' tab in Google Sheet) ──────────
+// -- App Settings (from 'Settings' tab in Google Sheet) ----------
 // Sheet column order:  key | value
 // Example rows in your sheet:
 //   key        | value
@@ -106,7 +106,7 @@ const SAMPLE_SETTINGS = {
   app_version: '2.0.0',
 };
 
-// ── CSV Parser (with key-field filter — for Contacts, Orgs, Emergency) ──
+// -- CSV Parser (with key-field filter -- for Contacts, Orgs, Emergency) --
 function parseCSV(text) {
   if (!text || !text.trim()) return [];
   const cleaned = text.replace(/^\uFEFF/, '').trim();
@@ -130,7 +130,7 @@ function parseCSV(text) {
   return rows;
 }
 
-// ── CSV Parser RAW (no key-field filter — for Banner, Settings) ──────
+// -- CSV Parser RAW (no key-field filter -- for Banner, Settings) ------
 // Use this for sheets that don't have name/org_id columns (banner, settings)
 function parseCSVRaw(text) {
   if (!text || !text.trim()) return [];

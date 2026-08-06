@@ -1,10 +1,8 @@
 // ================================================================
-// BADAS DIRECTORY - Service Worker v2.5
-// Strategy: Network-first for JS/CSS (always fresh),
-//           Cache-first for fonts only (offline support)
+// BADAS DIRECTORY - Service Worker v2.7
 // ================================================================
 
-const CACHE_NAME = 'badas-dir-v2.6';  // ← bump this when deploying updates
+const CACHE_NAME = 'badas-dir-v2.7';  // ← bump this when deploying updates
 
 // Only cache fonts (static). JS/CSS/HTML always fetched fresh from network.
 const FONT_CACHE = 'badas-fonts-v1';
