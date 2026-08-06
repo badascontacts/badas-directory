@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="BADAS Contact Directory — Official contact directory for BADAS and its sister organizations">
+  <meta name="theme-color" content="#060B1F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BADAS Directory">
+  <title>BADAS Contact Directory</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Register SW early so it updates even if app JS crashes -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => reg.update())
+        .catch(() => {});
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ═════════════════════ LOCK SCREEN ═════════════════════ -->
+  <div id="lock-screen" class="lock-screen">
+    <!-- Animated background -->
+    <div class="lock-bg">
+      <div class="lock-bg-orb orb-1"></div>
+      <div class="lock-bg-orb orb-2"></div>
+      <div class="lock-bg-orb orb-3"></div>
+    </div>
+
+    <div class="lock-card" id="lock-card">
+      <!-- Logo & Title -->
+      <div class="lock-logo-wrap">
+        <div class="lock-logo-ring"></div>
+        <div class="lock-logo-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="lock-title-group">
+        <h1 class="lock-app-name">BADAS Directory</h1>
+        <p class="lock-tagline">Authorized Access Only</p>
+      </div>
+
+      <!-- Divider -->
+      <div class="lock-divider"></div>
+
+      <!-- Password Field -->
+      <div class="lock-field-group">
+        <label class="lock-label" for="lock-password-input">Password</label>
+        <div class="lock-input-wrap" id="lock-input-wrap">
+          <div class="lock-input-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <input
+            type="password"
+            id="lock-password-input"
+            class="lock-input"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          >
+          <button class="lock-eye-btn" id="lock-eye-btn" type="button" aria-label="Show/hide password">
+            <!-- Eye open -->
+            <svg id="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <!-- Eye closed -->
+            <svg id="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Error message -->
+        <p class="lock-error hidden" id="lock-error">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Incorrect password. Please try again.
+        </p>
+        <!-- Hint box (shown after wrong password if sheet has a hint) -->
+        <div class="lock-hint-box hidden" id="lock-hint-box">
+          <div class="lock-hint-icon">💡</div>
+          <p id="lock-hint-text"></p>
+        </div>
+      </div>
+
+      <!-- Permanent Session Notice -->
+      <div class="lock-permanent-notice">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>একবার login করলে password না বদলানো পর্যন্ত আর password লাগবে না।</span>
+      </div>
+
+      <!-- Unlock Button -->
+      <button class="lock-unlock-btn" id="lock-unlock-btn" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+        </svg>
+        Unlock
+      </button>
+
+      <!-- Fetch status (shown while loading settings from sheet) -->
+      <p class="lock-fetch-status hidden" id="lock-fetch-status"></p>
+
+      <!-- Footer -->
+      <p class="lock-footer">BADAS — Confidential Directory</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SPLASH SCREEN ═══════════════════ -->
+  <div id="splash-screen" class="splash">
+    <div class="splash-logo">
+      <img src="https://drive.google.com/uc?export=view&id=1DgEbcphbQj4SwxNatPeBg_chAmbNqNAM" alt="BADAS Logo" class="splash-logo-img"
+           onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+      <svg style="display:none" width="80" height="80" viewBox="0 0 80 80">
+        <defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0D47A1"/><stop offset="100%" stop-color="#1565C0"/></linearGradient></defs>
+        <circle cx="40" cy="40" r="38" fill="url(#lg1)" opacity="0.15"/>
+        <circle cx="40" cy="40" r="28" fill="url(#lg1)" opacity="0.3"/>
+        <circle cx="40" cy="40" r="18" fill="url(#lg1)"/>
+        <text x="40" y="45" text-anchor="middle" fill="white" font-size="11" font-weight="800" font-family="Arial">BADAS</text>
+      </svg>
+    </div>
+    <h1 class="splash-title">BADAS Directory</h1>
+    <p class="splash-subtitle">Contact Directory</p>
+    <div class="splash-loader"><div class="loader-bar"></div></div>
+    <p class="splash-status" id="splash-status">Loading…</p>
+  </div>
+
+  <!-- ═══════════════════ MAIN APP ═══════════════════ -->
+  <div id="app" class="app hidden">
+
+    <!-- HEADER -->
+    <header class="header" id="main-header">
+      <div class="header-content">
+        <button class="back-btn hidden" id="back-btn" aria-label="Go back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+        </button>
+        <button class="drawer-btn" id="drawer-btn" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="header-brand">
+          <div class="header-logo-icon">
+            <img src="https://drive.google.com/uc?export=view&id=1DgEbcphbQj4SwxNatPeBg_chAmbNqNAM" alt="BADAS" class="header-logo-img"
+                 onerror="this.style.display='none';this.parentElement.textContent='B'">
+          </div>
+          <div class="header-text">
+            <h1 id="page-title">BADAS Directory</h1>
+            <p id="page-subtitle">Contact Directory</p>
+          </div>
+        </div>
+        <button class="sync-btn" id="sync-btn" aria-label="Sync data" title="Sync data">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- PAGES CONTAINER -->
+    <main class="pages-container" id="pages-container">
+
+      <!-- ─── HOME PAGE ─── -->
+      <div id="page-home" class="page active">
+        <div class="hero-section">
+          <div class="hero-bg"></div>
+          <div class="hero-content">
+            <div class="sync-status" id="sync-status">
+              <span class="sync-dot"></span>
+              <span id="sync-text">Checking for updates…</span>
+            </div>
+            <div class="search-bar-wrapper">
+              <div class="search-bar">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="org-search" placeholder="Search organizations…" autocomplete="off">
+                <button class="search-clear hidden" id="org-search-clear" aria-label="Clear search">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">Organizations</h2>
+            <span class="section-count" id="org-count">0</span>
+          </div>
+          <div class="org-grid" id="org-grid"></div>
+          <div class="empty-state hidden" id="org-empty">
+            <div class="empty-icon">🔍</div>
+            <p>No organizations found</p>
+          </div>
+        </div>
+        <div class="stats-section" id="stats-section">
+          <div class="stat-card">
+            <div class="stat-number" id="stat-orgs">0</div>
+            <div class="stat-label">Organizations</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="stat-contacts">0</div>
+            <div class="stat-label">Contacts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="stat-depts">0</div>
+            <div class="stat-label">Departments</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── ORGANIZATION PROFILE PAGE ─── -->
+      <div id="page-org" class="page">
+        <div class="org-hero" id="org-hero">
+          <div class="org-hero-bg" id="org-hero-bg"></div>
+          <div class="org-logo-large" id="org-logo-large"></div>
+          <h2 class="org-hero-name" id="org-hero-name"></h2>
+          <p class="org-hero-full" id="org-hero-full"></p>
+        </div>
+        <div class="org-info-section" id="org-info-section"></div>
+        <div class="section">
+          <button class="btn-primary full-width" id="view-contacts-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            View All Contacts
+          </button>
+        </div>
+      </div>
+
+      <!-- ─── CONTACTS PAGE ─── -->
+      <div id="page-contacts" class="page">
+        <div class="contacts-header-section">
+          <div class="search-bar-wrapper">
+            <div class="search-bar">
+              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="contact-search" placeholder="Search by name, designation…" autocomplete="off">
+              <button class="search-clear hidden" id="contact-search-clear" aria-label="Clear">✕</button>
+            </div>
+          </div>
+          <div class="filter-bar" id="filter-bar">
+            <div class="filter-group">
+              <label class="filter-label">Organization</label>
+              <select class="filter-select" id="filter-org"><option value="">All Organizations</option></select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Department</label>
+              <select class="filter-select" id="filter-dept"><option value="">All Departments</option></select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Designation</label>
+              <select class="filter-select" id="filter-desig"><option value="">All Designations</option></select>
+            </div>
+          </div>
+          <div class="results-info">
+            <span id="contact-count-text">Loading contacts…</span>
+            <button class="clear-filters-btn hidden" id="clear-filters">Clear filters</button>
+          </div>
+        </div>
+        <div class="contacts-org-banner hidden" id="contacts-org-banner"></div>
+        <div class="contacts-list" id="contacts-list"></div>
+
+        <div class="empty-state hidden" id="contact-empty">
+          <div class="empty-icon">👤</div>
+          <p>No contacts found</p>
+          <button class="btn-secondary" id="clear-filters-empty">Clear filters</button>
+        </div>
+      </div>
+
+      <!-- ─── EMERGENCY PAGE ─── -->
+      <div id="page-emergency" class="page">
+        <!-- Emergency Hero -->
+        <div class="emergency-hero">
+          <div class="emergency-hero-pulse"></div>
+          <div class="emergency-hero-icon">🚨</div>
+          <h2 class="emergency-hero-title">Emergency</h2>
+          <p class="emergency-hero-sub">Tap any number to call immediately</p>
+        </div>
+
+        <!-- National Helplines -->
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">National Helplines</h2>
+          </div>
+          <div class="national-grid" id="national-emergency-grid">
+            <!-- rendered by JS -->
+          </div>
+        </div>
+
+        <!-- BADAS Emergency Contacts -->
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">BADAS Emergency</h2>
+            <span class="section-count" id="emergency-count">0</span>
+          </div>
+          <div class="emergency-contacts-list" id="emergency-contacts-list"></div>
+          <div class="empty-state hidden" id="emergency-empty">
+            <div class="empty-icon">📞</div>
+            <p>No emergency contacts added yet</p>
+            <p style="font-size:12px;color:var(--text-4);margin-top:6px;">Add contacts in your Google Sheet's Emergency tab</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── CONTACT DETAIL PAGE ─── -->
+      <div id="page-contact-detail" class="page">
+        <div class="contact-hero" id="contact-hero">
+          <div class="contact-photo-large" id="contact-photo-large"></div>
+          <h2 class="contact-hero-name" id="contact-hero-name"></h2>
+          <p class="contact-hero-designation" id="contact-hero-designation"></p>
+          <p class="contact-hero-org" id="contact-hero-org"></p>
+        </div>
+        <div class="contact-detail-info" id="contact-detail-info"></div>
+        <div class="contact-actions" id="contact-actions"></div>
+      </div>
+
+    </main><!-- /pages-container -->
+
+    <!-- BANNER AD (above bottom nav, hidden when no ad) -->
+    <div class="banner-ad hidden" id="banner-ad">
+      <a id="banner-link" href="#" target="_blank" rel="noopener sponsored">
+        <img id="banner-img" src="" alt="Notice">
+
+      </a>
+      <button class="banner-close" id="banner-close" aria-label="Close ad">✕</button>
+    </div>
+
+    <!-- BOTTOM NAVIGATION (3 buttons) -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <button class="nav-item active" id="nav-home" aria-label="Home">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9,22 9,12 15,12 15,22"/>
+        </svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" id="nav-contacts" aria-label="Contacts">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>Contacts</span>
+      </button>
+      <button class="nav-item nav-emergency" id="nav-emergency" aria-label="Emergency">
+        <div class="nav-emergency-dot"></div>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span>Emergency</span>
+      </button>
+    </nav>
+
+    <!-- TOAST -->
+    <div class="toast hidden" id="toast"><span id="toast-message"></span></div>
+
+  </div><!-- /app -->
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- ═══════════════════ LEFT DRAWER ═══════════════════ -->
+  <div id="drawer-overlay" class="drawer-overlay hidden"></div>
+  <div id="drawer" class="drawer">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <img src="https://drive.google.com/uc?export=view&id=1DgEbcphbQj4SwxNatPeBg_chAmbNqNAM" alt="BADAS" class="drawer-logo-img"
+             onerror="this.style.display='none';this.parentElement.textContent='B'">
+      </div>
+      <div>
+        <div class="drawer-app-name">BADAS Directory</div>
+        <div class="drawer-app-tagline">Contact Directory</div>
+      </div>
+      <button class="drawer-close" id="drawer-close" aria-label="Close menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="drawer-section-title">Developer Info</div>
+      <div class="drawer-dev-card">
+        <div class="drawer-dev-avatar">MA</div>
+        <div class="drawer-dev-info">
+          <div class="drawer-dev-name">Md Abdul Aziz</div>
+          <div class="drawer-dev-role">App Developer</div>
+        </div>
+      </div>
+      <div class="drawer-contact-list">
+        <a href="mailto:mdaaziz99@gmail.com" class="drawer-contact-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>mdaaziz99@gmail.com</span>
+        </a>
+        <a href="tel:+8801911332767" class="drawer-contact-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+          <span>01911-332767</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <div id="drawer-app-version" class="drawer-version">Version 2.0.0</div>
+      <div class="drawer-copyright">© 2025 BADAS. All rights reserved.</div>
+    </div>
+  </div>
+
+</body>
+</html>
