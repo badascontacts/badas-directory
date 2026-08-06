@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="BADAS Contact Directory — Official contact directory for BADAS and its sister organizations">
+  <meta name="description" content="BADAS Contact Directory â€” Official contact directory for BADAS and its sister organizations">
   <meta name="theme-color" content="#060B1F">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,7 +26,7 @@
 </head>
 <body>
 
-  <!-- ═════════════════════ LOCK SCREEN ═════════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOCK SCREEN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div id="lock-screen" class="lock-screen">
     <!-- Animated background -->
     <div class="lock-bg">
@@ -95,7 +95,7 @@
         </p>
         <!-- Hint box (shown after wrong password if sheet has a hint) -->
         <div class="lock-hint-box hidden" id="lock-hint-box">
-          <div class="lock-hint-icon">💡</div>
+          <div class="lock-hint-icon">ðŸ’¡</div>
           <p id="lock-hint-text"></p>
         </div>
       </div>
@@ -103,7 +103,7 @@
       <!-- Permanent Session Notice -->
       <div class="lock-permanent-notice">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>একবার login করলে password না বদলানো পর্যন্ত আর password লাগবে না।</span>
+        <span>à¦à¦•à¦¬à¦¾à¦° login à¦•à¦°à¦²à§‡ password à¦¨à¦¾ à¦¬à¦¦à¦²à¦¾à¦¨à§‹ à¦ªà¦°à§à¦¯à¦¨à§à¦¤ à¦†à¦° password à¦²à¦¾à¦—à¦¬à§‡ à¦¨à¦¾à¥¤</span>
       </div>
 
       <!-- Unlock Button -->
@@ -119,15 +119,15 @@
       <p class="lock-fetch-status hidden" id="lock-fetch-status"></p>
 
       <!-- Footer -->
-      <p class="lock-footer">BADAS — Confidential Directory</p>
+      <p class="lock-footer">BADAS â€” Confidential Directory</p>
     </div>
   </div>
 
-  <!-- ═══════════════════ SPLASH SCREEN ═══════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SPLASH SCREEN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div id="splash-screen" class="splash">
     <div class="splash-logo">
       <img src="https://drive.google.com/uc?export=view&id=1DgEbcphbQj4SwxNatPeBg_chAmbNqNAM" alt="BADAS Logo" class="splash-logo-img"
-           onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <svg style="display:none" width="80" height="80" viewBox="0 0 80 80">
         <defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0D47A1"/><stop offset="100%" stop-color="#1565C0"/></linearGradient></defs>
         <circle cx="40" cy="40" r="38" fill="url(#lg1)" opacity="0.15"/>
@@ -139,10 +139,10 @@
     <h1 class="splash-title">BADAS Directory</h1>
     <p class="splash-subtitle">Contact Directory</p>
     <div class="splash-loader"><div class="loader-bar"></div></div>
-    <p class="splash-status" id="splash-status">Loading…</p>
+    <p class="splash-status" id="splash-status">Loadingâ€¦</p>
   </div>
 
-  <!-- ═══════════════════ MAIN APP ═══════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MAIN APP â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div id="app" class="app hidden">
 
     <!-- HEADER -->
@@ -178,20 +178,20 @@
     <!-- PAGES CONTAINER -->
     <main class="pages-container" id="pages-container">
 
-      <!-- ─── HOME PAGE ─── -->
+      <!-- â”€â”€â”€ HOME PAGE â”€â”€â”€ -->
       <div id="page-home" class="page active">
         <div class="hero-section">
           <div class="hero-bg"></div>
           <div class="hero-content">
             <div class="sync-status" id="sync-status">
               <span class="sync-dot"></span>
-              <span id="sync-text">Checking for updates…</span>
+              <span id="sync-text">Checking for updatesâ€¦</span>
             </div>
             <div class="search-bar-wrapper">
               <div class="search-bar">
                 <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="org-search" placeholder="Search organizations…" autocomplete="off">
-                <button class="search-clear hidden" id="org-search-clear" aria-label="Clear search">✕</button>
+                <input type="text" id="org-search" placeholder="Search organizationsâ€¦" autocomplete="off">
+                <button class="search-clear hidden" id="org-search-clear" aria-label="Clear search">âœ•</button>
               </div>
             </div>
           </div>
@@ -203,7 +203,7 @@
           </div>
           <div class="org-grid" id="org-grid"></div>
           <div class="empty-state hidden" id="org-empty">
-            <div class="empty-icon">🔍</div>
+            <div class="empty-icon">ðŸ”</div>
             <p>No organizations found</p>
           </div>
         </div>
@@ -223,7 +223,7 @@
         </div>
       </div>
 
-      <!-- ─── ORGANIZATION PROFILE PAGE ─── -->
+      <!-- â”€â”€â”€ ORGANIZATION PROFILE PAGE â”€â”€â”€ -->
       <div id="page-org" class="page">
         <div class="org-hero" id="org-hero">
           <div class="org-hero-bg" id="org-hero-bg"></div>
@@ -240,14 +240,14 @@
         </div>
       </div>
 
-      <!-- ─── CONTACTS PAGE ─── -->
+      <!-- â”€â”€â”€ CONTACTS PAGE â”€â”€â”€ -->
       <div id="page-contacts" class="page">
         <div class="contacts-header-section">
           <div class="search-bar-wrapper">
             <div class="search-bar">
               <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="text" id="contact-search" placeholder="Search by name, designation…" autocomplete="off">
-              <button class="search-clear hidden" id="contact-search-clear" aria-label="Clear">✕</button>
+              <input type="text" id="contact-search" placeholder="Search by name, designationâ€¦" autocomplete="off">
+              <button class="search-clear hidden" id="contact-search-clear" aria-label="Clear">âœ•</button>
             </div>
           </div>
           <div class="filter-bar" id="filter-bar">
@@ -265,7 +265,7 @@
             </div>
           </div>
           <div class="results-info">
-            <span id="contact-count-text">Loading contacts…</span>
+            <span id="contact-count-text">Loading contactsâ€¦</span>
             <button class="clear-filters-btn hidden" id="clear-filters">Clear filters</button>
           </div>
         </div>
@@ -273,18 +273,18 @@
         <div class="contacts-list" id="contacts-list"></div>
 
         <div class="empty-state hidden" id="contact-empty">
-          <div class="empty-icon">👤</div>
+          <div class="empty-icon">ðŸ‘¤</div>
           <p>No contacts found</p>
           <button class="btn-secondary" id="clear-filters-empty">Clear filters</button>
         </div>
       </div>
 
-      <!-- ─── EMERGENCY PAGE ─── -->
+      <!-- â”€â”€â”€ EMERGENCY PAGE â”€â”€â”€ -->
       <div id="page-emergency" class="page">
         <!-- Emergency Hero -->
         <div class="emergency-hero">
           <div class="emergency-hero-pulse"></div>
-          <div class="emergency-hero-icon">🚨</div>
+          <div class="emergency-hero-icon">ðŸš¨</div>
           <h2 class="emergency-hero-title">Emergency</h2>
           <p class="emergency-hero-sub">Tap any number to call immediately</p>
         </div>
@@ -307,14 +307,14 @@
           </div>
           <div class="emergency-contacts-list" id="emergency-contacts-list"></div>
           <div class="empty-state hidden" id="emergency-empty">
-            <div class="empty-icon">📞</div>
+            <div class="empty-icon">ðŸ“ž</div>
             <p>No emergency contacts added yet</p>
             <p style="font-size:12px;color:var(--text-4);margin-top:6px;">Add contacts in your Google Sheet's Emergency tab</p>
           </div>
         </div>
       </div>
 
-      <!-- ─── CONTACT DETAIL PAGE ─── -->
+      <!-- â”€â”€â”€ CONTACT DETAIL PAGE â”€â”€â”€ -->
       <div id="page-contact-detail" class="page">
         <div class="contact-hero" id="contact-hero">
           <div class="contact-photo-large" id="contact-photo-large"></div>
@@ -334,7 +334,7 @@
         <img id="banner-img" src="" alt="Notice">
 
       </a>
-      <button class="banner-close" id="banner-close" aria-label="Close ad">✕</button>
+      <button class="banner-close" id="banner-close" aria-label="Close ad">âœ•</button>
     </div>
 
     <!-- BOTTOM NAVIGATION (3 buttons) -->
@@ -375,7 +375,7 @@
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
 
-  <!-- ═══════════════════ LEFT DRAWER ═══════════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LEFT DRAWER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div id="drawer-overlay" class="drawer-overlay hidden"></div>
   <div id="drawer" class="drawer">
     <div class="drawer-header">
@@ -415,7 +415,7 @@
 
     <div class="drawer-footer">
       <div id="drawer-app-version" class="drawer-version">Version 2.0.0</div>
-      <div class="drawer-copyright">© 2025 BADAS. All rights reserved.</div>
+      <div class="drawer-copyright">Â© 2025 BADAS. All rights reserved.</div>
     </div>
   </div>
 

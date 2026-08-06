@@ -1,4 +1,4 @@
-﻿// ================================================================
+// ================================================================
 // BADAS DIRECTORY -- Main Application
 // ================================================================
 
@@ -692,6 +692,7 @@ function renderHomePage() {
 }
 
 function renderOrgGrid(orgs) {
+  orgs = orgs || State.orgs || [];
   const grid  = $('org-grid');
   const count = $('org-count');
   const empty = $('org-empty');
