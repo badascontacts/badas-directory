@@ -35,9 +35,9 @@ const CONFIG = {
     ORGS:      'badas_orgs_v2',
     CONTACTS:  'badas_contacts_v2',
     EMERGENCY: 'badas_emergency_v2',
-    BANNER:    'badas_banner_v2',
+    BANNER:    'badas_banner_v3',
     LAST_SYNC: 'badas_last_sync_v2',
     SESSION:   'badas_session_v1',
-    SETTINGS:  'badas_settings_v1',
+    SETTINGS:  'badas_settings_v2',
   },
 };

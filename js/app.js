@@ -1,4 +1,4 @@
-// ================================================================
+﻿// ================================================================
 // BADAS DIRECTORY -- Main Application
 // ================================================================
 
@@ -550,75 +550,80 @@ let _bannerTimer = null;
 let _bannerIdx   = 0;
 let _bannerList  = [];
 
-// Auto-convert Drive share links to direct image URLs
 function convertToDirectImageUrl(url) {
   if (!url) return url;
-  const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
-  if (driveFileMatch) return `https://drive.google.com/uc?export=view&id=${driveFileMatch[1]}`;
-  const thumbMatch = url.match(/drive\.google\.com\/thumbnail\?.*id=([^&]+)/);
-  if (thumbMatch) return `https://drive.google.com/uc?export=view&id=${thumbMatch[1]}`;
-  const openMatch = url.match(/drive\.google\.com\/open\?.*id=([^&]+)/);
-  if (openMatch) {
-    return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
-  }
+  const m1 = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+  if (m1) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+  const m2 = url.match(/drive\.google\.com\/thumbnail\?.*id=([^&]+)/);
+  if (m2) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+  const m3 = url.match(/drive\.google\.com\/open\?.*id=([^&]+)/);
+  if (m3) return `https://drive.google.com/uc?export=view&id=${m3[1]}`;
   return url;
 }
 
-// Wrap URL through CORS proxy (weserv.nl -- free image CDN)
 function proxyUrl(url) {
   return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=800&output=webp&n=-1`;
 }
 
-function renderBannerAd(banner) {
+function renderBannerAd(banners) {
   const bannerEl = $('banner-ad');
-  const imgEl    = $('banner-img');
-  const linkEl   = $('banner-link');
   const pagesEl  = $('pages-container');
   if (!bannerEl) return;
-
-  const isActive = banner &&
-    (banner.is_active||'').trim().toUpperCase() === 'TRUE' &&
-    banner.image_url && banner.image_url.trim().startsWith('http');
-
-  if (isActive) {
-    const directUrl = convertToDirectImageUrl(banner.image_url.trim());
-    linkEl.href = (banner.click_url||'#').trim();
-
-    show(bannerEl);
-    pagesEl.classList.add('has-banner');
-    imgEl.loading = 'eager';
-    imgEl.alt     = 'Notice';
-
-    let attempt = 0;
-    const urls = [
-      directUrl,                    // 1st: direct / converted URL
-      proxyUrl(directUrl),          // 2nd: via wsrv.nl proxy (bypasses CORS)
-    ];
-
-    imgEl.onerror = () => {
-      attempt++;
-      if (attempt < urls.length) {
-        imgEl.src = urls[attempt];   // try next fallback
-      } else {
-        hide(bannerEl);              // all failed -- hide banner
-        pagesEl.classList.remove('has-banner');
-      }
-    };
-
-    imgEl.src = urls[0];
-  } else {
-    hide(bannerEl);
-    pagesEl.classList.remove('has-banner');
-  }
+  if (_bannerTimer) { clearTimeout(_bannerTimer); _bannerTimer = null; }
+  const raw  = Array.isArray(banners) ? banners : (banners ? [banners] : []);
+  const list = raw.filter(b => {
+    if (!b || !b.image_url || !b.image_url.trim().startsWith('http')) return false;
+    const active = (b.is_active || '').trim().toUpperCase();
+    return active === 'TRUE' || active === '';
+  });
+  _bannerList = list;
+  _bannerIdx  = 0;
+  if (!list.length) { hide(bannerEl); pagesEl.classList.remove('has-banner'); return; }
+  bannerEl.innerHTML = `
+    <div class="banner-slides">
+      ${list.map((b,i) => {
+        const direct = convertToDirectImageUrl(b.image_url.trim());
+        const proxy  = proxyUrl(direct);
+        return `<a href="${(b.click_url||'#').trim()}" target="_blank" rel="noopener"
+           class="banner-slide${i===0?' active':''}" data-idx="${i}">
+          <img src="${direct}" alt="Banner ${i+1}"
+               onerror="if(!this._tried){this._tried=true;this.src='${proxy}';}"
+               style="width:100%;height:100%;object-fit:cover;display:block">
+        </a>`;
+      }).join('')}
+    </div>
+    <button class="banner-close" id="banner-close">&#x2715;</button>
+    ${list.length > 1 ? `<div class="banner-dots">${list.map((_,i)=>`<span class="banner-dot${i===0?' active':''}" data-idx="${i}"></span>`).join('')}</div>` : ''}
+  `;
+  show(bannerEl);
+  pagesEl.classList.add('has-banner');
+  const closeBtn = $('banner-close');
+  if (closeBtn) closeBtn.onclick = e => {
+    e.preventDefault(); e.stopPropagation();
+    if (_bannerTimer) clearTimeout(_bannerTimer);
+    hide(bannerEl); pagesEl.classList.remove('has-banner');
+  };
+  bannerEl.querySelectorAll('.banner-dot').forEach(dot => {
+    dot.onclick = () => _showSlide(parseInt(dot.dataset.idx));
+  });
+  if (list.length > 1) _scheduleBannerNext();
 }
 
+function _showSlide(idx) {
+  if (_bannerTimer) { clearTimeout(_bannerTimer); _bannerTimer = null; }
+  _bannerIdx = ((idx % _bannerList.length) + _bannerList.length) % _bannerList.length;
+  const bannerEl = $('banner-ad');
+  if (!bannerEl) return;
+  bannerEl.querySelectorAll('.banner-slide').forEach((s,i) => s.classList.toggle('active', i===_bannerIdx));
+  bannerEl.querySelectorAll('.banner-dot').forEach((d,i)   => d.classList.toggle('active', i===_bannerIdx));
+  if (_bannerList.length > 1) _scheduleBannerNext();
+}
 
-
-
-
-
-
-
+function _scheduleBannerNext() {
+  const cur = _bannerList[_bannerIdx];
+  const dur = Math.max(1, parseInt(cur.duration_sec) || 4) * 1000;
+  _bannerTimer = setTimeout(() => _showSlide(_bannerIdx + 1), dur);
+}
 // -- Navigation ----------------------------------------------------
 function navigate(page, params={}) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
