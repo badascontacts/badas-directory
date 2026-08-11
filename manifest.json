@@ -4,20 +4,20 @@
   "description": "Official Contact Directory for BADAS and its Sister Organizations",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#060B1F",
-  "theme_color": "#060B1F",
+  "background_color": "#112340",
+  "theme_color": "#112340",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icons/icon-192.svg",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-512.svg",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],

@@ -1,8 +1,8 @@
-﻿// ================================================================
+// ================================================================
 // BADAS DIRECTORY - Service Worker v2.8
 // ================================================================
 
-const CACHE_NAME = 'badas-dir-v3.1';
+const CACHE_NAME = 'badas-dir-v3.3';
 const FONT_CACHE = 'badas-fonts-v1';
 
 const PRECACHE_ASSETS = [
@@ -13,8 +13,8 @@ const PRECACHE_ASSETS = [
   './js/data.js',
   './js/app.js',
   './manifest.json',
-  './icons/icon-192.svg',
-  './icons/icon-512.svg'
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 // External image/API domains -- never cache, never intercept
