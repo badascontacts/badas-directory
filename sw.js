@@ -1,9 +1,10 @@
-// ================================================================
-// BADAS DIRECTORY - Service Worker v2.8
+﻿// ================================================================
+// BADAS DIRECTORY - Service Worker v3.4 (Full Offline Support)
 // ================================================================
 
-const CACHE_NAME = 'badas-dir-v3.3';
-const FONT_CACHE = 'badas-fonts-v1';
+const CACHE_NAME  = 'badas-dir-v3.4';
+const FONT_CACHE  = 'badas-fonts-v1';
+const IMAGE_CACHE = 'badas-images-v1';
 
 const PRECACHE_ASSETS = [
   './',
@@ -17,16 +18,13 @@ const PRECACHE_ASSETS = [
   './icons/icon-512.png'
 ];
 
-// External image/API domains -- never cache, never intercept
-const SKIP_HOSTS = [
+const IMAGE_HOSTS = [
   'logo.clearbit.com',
   'www.gravatar.com',
   'ui-avatars.com',
   'wsrv.nl',
   'drive.google.com',
-  'lh3.googleusercontent.com',
-  'fonts.gstatic.com',
-  'fonts.googleapis.com',
+  'lh3.googleusercontent.com'
 ];
 
 self.addEventListener('install', (event) => {
@@ -41,7 +39,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE_NAME && k !== FONT_CACHE)
+        keys.filter(k => k !== CACHE_NAME && k !== FONT_CACHE && k !== IMAGE_CACHE)
             .map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
@@ -52,24 +50,43 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = req.url;
 
-  // Skip non-http schemes (chrome-extension, data, blob, etc.)
+  // Skip non-http schemes
   if (!url.startsWith('http')) return;
 
   let host = '';
   try { host = new URL(url).hostname; } catch { return; }
 
-  // Skip Google Sheets / APIs -- network only, never cache
-  if (host.includes('docs.google.com') || host.includes('googleapis.com')) {
+  // 1. Google Sheets / APIs -- Network Only! If offline, return 503 so app.js catches it
+  if (host.includes('docs.google.com') && !url.includes('/uc?')) {
+    event.respondWith(
+      fetch(req, { cache: 'no-store' }).catch(() => new Response('', { status: 503 }))
+    );
+    return;
+  }
+  if (host.includes('googleapis.com')) {
     event.respondWith(
       fetch(req, { cache: 'no-store' }).catch(() => new Response('', { status: 503 }))
     );
     return;
   }
 
-  // Skip external image/avatar CDNs -- let browser handle directly
-  if (SKIP_HOSTS.some(h => host.includes(h))) return;
+  // 2. Images (Drive, Avatars, etc.) -- Stale-While-Revalidate
+  if (IMAGE_HOSTS.some(h => host.includes(h))) {
+    event.respondWith(
+      caches.match(req).then(cached => {
+        const fetchPromise = fetch(req, { mode: 'no-cors' }).then(res => {
+          if (res && (res.status === 200 || res.status === 0)) {
+            caches.open(IMAGE_CACHE).then(c => c.put(req, res.clone()));
+          }
+          return res;
+        }).catch(() => {});
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
 
-  // Google Fonts -- cache first
+  // 3. Google Fonts -- Cache First
   if (host.includes('fonts.gstatic.com') || host.includes('fonts.googleapis.com')) {
     event.respondWith(
       caches.match(req).then(cached => {
@@ -85,7 +102,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell (JS, CSS, HTML, icons) -- network first, cache fallback
+  // 4. App Shell (JS, CSS, HTML) -- Network First, fallback to cache
   event.respondWith(
     fetch(req, { cache: 'no-cache' })
       .then(res => {
