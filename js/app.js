@@ -1092,23 +1092,6 @@ function applyLogoFromSettings(settings) {
       style="width:100%;height:100%;object-fit:contain;border-radius:12px"
       onerror="this.parentNode.innerHTML='B'">`;
   }
-
-  // Dynamic PWA Manifest (Updates the "Install App" icon)
-  try {
-    const manifest = {
-      name: "BADAS Directory",
-      short_name: "BADAS",
-      start_url: "./index.html",
-      display: "standalone",
-      background_color: "#112340",
-      theme_color: "#112340",
-      icons: [{ src: direct, sizes: "192x192 512x512", type: "image/png", purpose: "any maskable" }]
-    };
-    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-    const manifestURL = URL.createObjectURL(blob);
-    const manifestLink = document.querySelector('link[rel="manifest"]');
-    if (manifestLink) manifestLink.setAttribute('href', manifestURL);
-  } catch(e) {}
 }
 
 async function initApp() {
